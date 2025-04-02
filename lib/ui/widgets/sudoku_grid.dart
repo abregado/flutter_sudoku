@@ -40,20 +40,8 @@ class SudokuGrid extends StatelessWidget {
     final value = gameState.grid[row][col];
     final isInitial = gameState.initialCells[row][col];
     final isSelected = gameState.selectedRow == row && gameState.selectedCol == col;
-    
-    // Check if this cell should be highlighted (same row, column, or 3x3 box)
-    final isHighlighted = isSelected || 
-        (gameState.selectedRow != null && 
-         (gameState.selectedRow == row || 
-          gameState.selectedCol == col || 
-          _isInSameBox(row, col, gameState.selectedRow!, gameState.selectedCol!)));
-    
-    // Check if this cell has an invalid value
+    final isHighlighted = _isHighlighted(gameState, row, col);
     final isInvalid = value != null && !gameState.isValidMove(row, col, value);
-    
-    // Determine if this cell has a right or bottom border that should be thicker
-    final isRightBorder = (col + 1) % 3 == 0 && col < 8;
-    final isBottomBorder = (row + 1) % 3 == 0 && row < 8;
     
     return SudokuCell(
       value: value,
@@ -61,11 +49,11 @@ class SudokuGrid extends StatelessWidget {
       isSelected: isSelected,
       isHighlighted: isHighlighted,
       isInvalid: isInvalid,
-      isRightBorder: isRightBorder,
-      isBottomBorder: isBottomBorder,
-      onTap: () {
-        gameState.selectCell(row, col);
-      },
+      showTopBorder: row % 3 == 0,
+      showBottomBorder: row % 3 == 2,
+      showLeftBorder: col % 3 == 0,
+      showRightBorder: col % 3 == 2,
+      onTap: () => gameState.selectCell(row, col),
     );
   }
   
@@ -75,5 +63,18 @@ class SudokuGrid extends StatelessWidget {
     final boxRow2 = row2 ~/ 3;
     final boxCol2 = col2 ~/ 3;
     return boxRow1 == boxRow2 && boxCol1 == boxCol2;
+  }
+
+  bool _isHighlighted(GameState gameState, int row, int col) {
+    final isSelected = gameState.selectedRow == row && gameState.selectedCol == col;
+    
+    // Check if this cell should be highlighted (same row, column, or 3x3 box)
+    final isHighlighted = isSelected || 
+        (gameState.selectedRow != null && 
+         (gameState.selectedRow == row || 
+          gameState.selectedCol == col || 
+          _isInSameBox(row, col, gameState.selectedRow!, gameState.selectedCol!)));
+    
+    return isHighlighted;
   }
 } 

@@ -6,9 +6,11 @@ class SudokuCell extends StatelessWidget {
   final bool isSelected;
   final bool isHighlighted;
   final bool isInvalid;
+  final bool showTopBorder;
+  final bool showBottomBorder;
+  final bool showLeftBorder;
+  final bool showRightBorder;
   final VoidCallback onTap;
-  final bool isRightBorder;
-  final bool isBottomBorder;
 
   const SudokuCell({
     super.key,
@@ -17,9 +19,11 @@ class SudokuCell extends StatelessWidget {
     required this.isSelected,
     required this.isHighlighted,
     required this.isInvalid,
+    required this.showTopBorder,
+    required this.showBottomBorder,
+    required this.showLeftBorder,
+    required this.showRightBorder,
     required this.onTap,
-    this.isRightBorder = false,
-    this.isBottomBorder = false,
   });
 
   @override
@@ -28,45 +32,57 @@ class SudokuCell extends StatelessWidget {
       onTap: onTap,
       child: Container(
         decoration: BoxDecoration(
-          color: _getCellColor(context),
+          color: _getBackgroundColor(context),
           border: Border(
-            right: BorderSide(
-              width: isRightBorder ? 2.0 : 1.0,
+            top: BorderSide(
               color: Theme.of(context).dividerColor,
+              width: showTopBorder ? 1.0 : 0.0,
             ),
             bottom: BorderSide(
-              width: isBottomBorder ? 2.0 : 1.0,
               color: Theme.of(context).dividerColor,
+              width: showBottomBorder ? 1.0 : 0.0,
+            ),
+            left: BorderSide(
+              color: Theme.of(context).dividerColor,
+              width: showLeftBorder ? 1.0 : 0.0,
+            ),
+            right: BorderSide(
+              color: Theme.of(context).dividerColor,
+              width: showRightBorder ? 1.0 : 0.0,
             ),
           ),
         ),
         child: Center(
-          child: value != null
-              ? Text(
-                  value.toString(),
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: isInitial ? FontWeight.bold : FontWeight.normal,
-                    color: isInvalid
-                        ? Colors.red
-                        : isInitial
-                            ? Colors.black87
-                            : Colors.blue,
-                  ),
-                )
-              : null,
+          child: Text(
+            value?.toString() ?? '',
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: isInitial ? FontWeight.bold : FontWeight.normal,
+              color: _getTextColor(context),
+            ),
+          ),
         ),
       ),
     );
   }
 
-  Color _getCellColor(BuildContext context) {
+  Color _getBackgroundColor(BuildContext context) {
     if (isSelected) {
-      return Theme.of(context).colorScheme.primaryContainer.withOpacity(0.7);
-    } else if (isHighlighted) {
-      return Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3);
-    } else {
-      return Colors.transparent;
+      return Theme.of(context).colorScheme.primaryContainer;
     }
+    if (isHighlighted) {
+      return Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3);
+    }
+    return Colors.transparent;
+  }
+
+  Color _getTextColor(BuildContext context) {
+    if (isInvalid) {
+      return Theme.of(context).colorScheme.error;
+    }
+    if (isInitial) {
+      return Theme.of(context).colorScheme.onSurface;
+    }
+    return Theme.of(context).colorScheme.onSurface;
   }
 } 

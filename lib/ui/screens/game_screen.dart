@@ -14,8 +14,36 @@ class GameScreen extends StatefulWidget {
   State<GameScreen> createState() => _GameScreenState();
 }
 
-class _GameScreenState extends State<GameScreen> {
+class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   final PuzzleGenerator _generator = BacktrackingGenerator();
+  
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Start the timer when the screen is created
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<GameState>().startTimer();
+    });
+  }
+  
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    // Stop the timer when the screen is disposed
+    context.read<GameState>().stopTimer();
+    super.dispose();
+  }
+  
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final gameState = context.read<GameState>();
+    if (state == AppLifecycleState.paused) {
+      gameState.stopTimer();
+    } else if (state == AppLifecycleState.resumed) {
+      gameState.startTimer();
+    }
+  }
   
   void _startNewGame() {
     final settings = context.read<PuzzleSettings>();
@@ -23,6 +51,7 @@ class _GameScreenState extends State<GameScreen> {
     
     final (grid, solution) = _generator.generatePuzzle(settings);
     gameState.startNewGameWithPuzzle(grid, solution);
+    gameState.startTimer();
   }
   
   void _openSettings() {
@@ -53,10 +82,6 @@ class _GameScreenState extends State<GameScreen> {
               context.read<GameState>().undo();
             },
           ),
-          IconButton(
-            icon: const Icon(Icons.timer),
-            onPressed: () => context.read<GameState>().toggleTimer(),
-          ),
         ],
       ),
       body: Consumer<GameState>(
@@ -65,16 +90,8 @@ class _GameScreenState extends State<GameScreen> {
             children: [
               Column(
                 children: [
-                  if (gameState.showTimer)
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Text(
-                        gameState.formattedTime,
-                        style: Theme.of(context).textTheme.headlineMedium,
-                      ),
-                    ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -120,6 +137,19 @@ class _GameScreenState extends State<GameScreen> {
                           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Time: ${gameState.formatDuration(gameState.completionTime!)}',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          'Mistakes: ${gameState.completionMistakes}',
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            color: Colors.white,
                           ),
                         ),
                         const SizedBox(height: 32),
