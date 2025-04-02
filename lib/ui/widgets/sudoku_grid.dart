@@ -10,25 +10,17 @@ class SudokuGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Calculate the size of the grid to be square and fill the width
-        final size = constraints.maxWidth;
-        
+        final width = constraints.maxWidth;
         return AspectRatio(
-          aspectRatio: 1.0,
+          aspectRatio: 1,
           child: Container(
-            width: size,
-            height: size,
             decoration: BoxDecoration(
-              border: Border.all(
-                color: Theme.of(context).dividerColor,
-                width: 2.0,
-              ),
+              color: Colors.white,
             ),
             child: GridView.builder(
-              physics: const NeverScrollableScrollPhysics(),
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 9,
-                childAspectRatio: 1.0,
+                childAspectRatio: 1,
               ),
               itemCount: 81,
               itemBuilder: (context, index) {

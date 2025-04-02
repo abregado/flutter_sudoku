@@ -7,79 +7,82 @@ class NumberInputRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gameState = context.watch<GameState>();
-    
-    return Container(
-      height: 60,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          // Clear button
-          _buildClearButton(context, gameState),
-          
-          // Number buttons
-          ...List.generate(9, (index) {
-            final number = index + 1;
-            final isDisabled = _isNumberDisabled(gameState, number);
-            
-            return _buildNumberButton(context, number, isDisabled, gameState);
-          }),
-        ],
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final buttonSize = width / 10; // 9 numbers + 1 clear button
+        
+        return SizedBox(
+          height: buttonSize,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ...List.generate(9, (index) => _buildNumberButton(context, index + 1, buttonSize)),
+              _buildClearButton(context, buttonSize),
+            ],
+          ),
+        );
+      },
     );
   }
-  
-  Widget _buildClearButton(BuildContext context, GameState gameState) {
-    return GestureDetector(
-      onTap: () {
-        if (gameState.selectedRow != null && gameState.selectedCol != null) {
-          gameState.makeMove(gameState.selectedRow!, gameState.selectedCol!, null);
-        }
+
+  Widget _buildNumberButton(BuildContext context, int number, double size) {
+    return Consumer<GameState>(
+      builder: (context, gameState, child) {
+        final isDisabled = _isNumberDisabled(gameState, number);
+        
+        return SizedBox(
+          width: size,
+          height: size,
+          child: GestureDetector(
+            onTap: isDisabled ? null : () => gameState.makeMove(number),
+            child: Container(
+              margin: const EdgeInsets.all(2),
+              decoration: BoxDecoration(
+                color: isDisabled ? Colors.grey[200] : Colors.blue[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isDisabled ? Colors.grey[300]! : Colors.blue[200]!,
+                  width: 1,
+                ),
+              ),
+              child: Center(
+                child: Text(
+                  number.toString(),
+                  style: TextStyle(
+                    fontSize: size * 0.5,
+                    color: isDisabled ? Colors.grey[400] : Colors.blue[700],
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
       },
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.errorContainer,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
+    );
+  }
+
+  Widget _buildClearButton(BuildContext context, double size) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: GestureDetector(
+        onTap: () => context.read<GameState>().makeMove(null),
+        child: Container(
+          margin: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            color: Colors.red[50],
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: Colors.red[200]!,
+              width: 1,
+            ),
+          ),
           child: Icon(
             Icons.clear,
-            color: Theme.of(context).colorScheme.onErrorContainer,
-          ),
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildNumberButton(BuildContext context, int number, bool isDisabled, GameState gameState) {
-    return GestureDetector(
-      onTap: isDisabled ? null : () {
-        if (gameState.selectedRow != null && gameState.selectedCol != null) {
-          gameState.makeMove(gameState.selectedRow!, gameState.selectedCol!, number);
-        }
-      },
-      child: Container(
-        width: 40,
-        height: 40,
-        decoration: BoxDecoration(
-          color: isDisabled 
-              ? Theme.of(context).disabledColor.withOpacity(0.2)
-              : Theme.of(context).colorScheme.primaryContainer,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: Text(
-            number.toString(),
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: isDisabled 
-                  ? Theme.of(context).disabledColor
-                  : Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
+            size: size * 0.5,
+            color: Colors.red[700],
           ),
         ),
       ),

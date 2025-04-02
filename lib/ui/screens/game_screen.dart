@@ -53,40 +53,97 @@ class _GameScreenState extends State<GameScreen> {
               context.read<GameState>().undo();
             },
           ),
+          IconButton(
+            icon: const Icon(Icons.timer),
+            onPressed: () => context.read<GameState>().toggleTimer(),
+          ),
         ],
       ),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Mistake counter
-            Consumer2<GameState, PuzzleSettings>(
-              builder: (context, gameState, settings, child) {
-                if (!settings.showMistakes) return const SizedBox.shrink();
-                return Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    'Mistakes: ${gameState.mistakes}',
-                    style: Theme.of(context).textTheme.titleLarge,
+      body: Consumer<GameState>(
+        builder: (context, gameState, child) {
+          return Stack(
+            children: [
+              Column(
+                children: [
+                  if (gameState.showTimer)
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Text(
+                        gameState.formattedTime,
+                        style: Theme.of(context).textTheme.headlineMedium,
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Mistakes: ${gameState.mistakes}',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        if (gameState.showTimer)
+                          Text(
+                            gameState.formattedTime,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                      ],
+                    ),
                   ),
-                );
-              },
-            ),
-            
-            // Sudoku grid
-            const Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16.0),
-                child: SudokuGrid(),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: SudokuGrid(),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: NumberInputRow(),
+                  ),
+                ],
               ),
-            ),
-            
-            // Number input row
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 8.0, vertical: 16.0),
-              child: NumberInputRow(),
-            ),
-          ],
-        ),
+              if (gameState.isComplete)
+                Container(
+                  color: Colors.black54,
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.check_circle,
+                          color: Colors.green,
+                          size: 100,
+                        ),
+                        const SizedBox(height: 16),
+                        Text(
+                          'Congratulations!',
+                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 32),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            gameState.resetTimer();
+                            _startNewGame();
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('New Puzzle'),
+                          style: ElevatedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 32,
+                              vertical: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }

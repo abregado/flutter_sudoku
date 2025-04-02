@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'dart:async';
 
 class GameState extends ChangeNotifier {
   // The Sudoku grid (9x9)
@@ -22,6 +23,48 @@ class GameState extends ChangeNotifier {
   
   // Undo stack
   final List<GameState> undoStack = [];
+  
+  Timer? _timer;
+  Duration _elapsedTime = Duration.zero;
+  bool _showTimer = true;
+  
+  Duration get elapsedTime => _elapsedTime;
+  bool get showTimer => _showTimer;
+  
+  void toggleTimer() {
+    _showTimer = !_showTimer;
+    notifyListeners();
+  }
+  
+  void startTimer() {
+    _timer?.cancel();
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _elapsedTime += const Duration(seconds: 1);
+      notifyListeners();
+    });
+  }
+  
+  void stopTimer() {
+    _timer?.cancel();
+  }
+  
+  void resetTimer() {
+    stopTimer();
+    _elapsedTime = Duration.zero;
+    notifyListeners();
+  }
+  
+  String get formattedTime {
+    final minutes = _elapsedTime.inMinutes;
+    final seconds = _elapsedTime.inSeconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
+  }
+  
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
   
   // Check if a move is valid
   bool isValidMove(int row, int col, int value) {
@@ -48,17 +91,18 @@ class GameState extends ChangeNotifier {
   }
   
   // Make a move
-  void makeMove(int row, int col, int? value) {
-    if (initialCells[row][col]) return; // Can't modify initial cells
+  void makeMove(int? value) {
+    if (selectedRow == null || selectedCol == null) return;
+    if (initialCells[selectedRow!][selectedCol!]) return; // Can't modify initial cells
     
     // Save current state for undo
     undoStack.add(GameState.from(this));
     
     // Make the move
-    grid[row][col] = value;
+    grid[selectedRow!][selectedCol!] = value;
     
     // Check if move is valid (only if we're setting a value, not clearing)
-    if (value != null && !isValidMove(row, col, value)) {
+    if (value != null && !isValidMove(selectedRow!, selectedCol!, value)) {
       mistakes++;
     }
     
@@ -102,7 +146,7 @@ class GameState extends ChangeNotifier {
   }
   
   // Start new game (empty grid)
-  void startNewGame() {
+  void newGame() {
     grid = List.generate(9, (_) => List.filled(9, null));
     solution = List.generate(9, (_) => List.filled(9, 0));
     initialCells = List.generate(9, (_) => List.filled(9, false));
@@ -116,7 +160,7 @@ class GameState extends ChangeNotifier {
   }
   
   // Check if game is complete
-  bool isComplete() {
+  bool get isComplete {
     for (int i = 0; i < 9; i++) {
       for (int j = 0; j < 9; j++) {
         if (grid[i][j] == null) return false;
