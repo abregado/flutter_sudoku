@@ -15,40 +15,45 @@ A simple offline Sudoku game app built with Flutter.
   - [x] Clear cell
   - [x] Mistake tracking
   - [x] Undo functionality
-- [ ] Advanced features
-  - [ ] Move validation
-  - [ ] Timer
-  - [ ] Difficulty levels
+- [x] Timer with pause/resume
+- [x] Mistake counter
+- [x] Settings for difficulty and display options
+- [x] Cross-platform support (Android, Windows, Linux)
 
-## Getting Started
+## Testing
+
+### Android Testing
+1. Download the latest APK from the [Releases](https://github.com/yourusername/flutter_sudoku/releases) page
+2. Enable "Install from Unknown Sources" in your Android settings
+3. Install the APK
+4. Test the app and report any issues in the [Issues](https://github.com/yourusername/flutter_sudoku/issues) section
+
+### Windows Testing
+1. Download the latest Windows build from the [Releases](https://github.com/yourusername/flutter_sudoku/releases) page
+2. Extract the zip file
+3. Run `flutter_sudoku.exe`
+4. Test the app and report any issues in the [Issues](https://github.com/yourusername/flutter_sudoku/issues) section
+
+### Linux Testing
+1. Download the latest Linux build from the [Releases](https://github.com/yourusername/flutter_sudoku/releases) page
+2. Extract the tar.gz file
+3. Run `flutter_sudoku`
+4. Test the app and report any issues in the [Issues](https://github.com/yourusername/flutter_sudoku/issues) section
+
+## Development
 
 ### Prerequisites
+- Flutter SDK (3.19.0 or later)
+- Android Studio / VS Code
+- Git
 
-- Flutter SDK (latest stable version)
-- Dart SDK (latest stable version)
-- Android Studio / VS Code with Flutter extensions
+### Setup
+1. Clone the repository
+2. Run `flutter pub get`
+3. Run `flutter run` to start the app
 
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/flutter_sudoku.git
-```
-
-2. Navigate to the project directory:
-```bash
-cd flutter_sudoku
-```
-
-3. Install dependencies:
-```bash
-flutter pub get
-```
-
-4. Run the app:
-```bash
-flutter run
-```
+### Building Release Versions
+Release builds are automatically created when pushing to the `release` branch. You can also manually trigger a build from the Actions tab.
 
 ## Project Structure
 
@@ -96,10 +101,10 @@ lib/
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a Pull Request
 
 ## License
 
