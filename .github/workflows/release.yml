@@ -1,0 +1,49 @@
+name: Release Build
+
+on:
+  push:
+    branches:
+      - release
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.19.0'
+          channel: 'stable'
+          
+      - name: Install dependencies
+        run: flutter pub get
+        
+      - name: Build APK
+        run: flutter build apk --release
+        
+      - name: Build Windows
+        run: flutter build windows --release
+        
+      - name: Build Linux
+        run: flutter build linux --release
+        
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter_sudoku_android
+          path: build/app/outputs/flutter-apk/app-release.apk
+          
+      - name: Upload Windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter_sudoku_windows
+          path: build/windows/runner/Release/
+          
+      - name: Upload Linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter_sudoku_linux
+          path: build/linux/x64/release/bundle/ 
