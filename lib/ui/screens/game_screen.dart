@@ -64,6 +64,9 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   
   @override
   Widget build(BuildContext context) {
+    // Get the bottom padding for the navigation bar
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    
     return Scaffold(
       appBar: AppBar(
         title: const Text('Sudoku'),
@@ -95,15 +98,24 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          'Mistakes: ${gameState.mistakes}',
-                          style: Theme.of(context).textTheme.titleMedium,
+                        Consumer<PuzzleSettings>(
+                          builder: (context, settings, child) {
+                            if (!settings.showMistakes) return const SizedBox.shrink();
+                            return Text(
+                              'Mistakes: ${gameState.mistakes}',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            );
+                          },
                         ),
-                        if (gameState.showTimer)
-                          Text(
-                            gameState.formattedTime,
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
+                        Consumer<PuzzleSettings>(
+                          builder: (context, settings, child) {
+                            if (!settings.showTimer) return const SizedBox.shrink();
+                            return Text(
+                              gameState.formattedTime,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            );
+                          },
+                        ),
                       ],
                     ),
                   ),
@@ -114,7 +126,11 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                     ),
                   ),
                   Padding(
-                    padding: const EdgeInsets.all(16.0),
+                    padding: EdgeInsets.only(
+                      left: 16.0,
+                      right: 16.0,
+                      bottom: 16.0 + bottomPadding,
+                    ),
                     child: NumberInputRow(),
                   ),
                 ],

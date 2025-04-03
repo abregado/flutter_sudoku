@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/puzzle_settings.dart';
+import '../../models/game_state.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -53,12 +54,18 @@ class SettingsScreen extends StatelessWidget {
               SwitchListTile(
                 title: const Text('Show Timer'),
                 value: settings.showTimer,
-                onChanged: (value) => settings.toggleTimer(),
+                onChanged: (value) {
+                  settings.toggleTimer();
+                  // Also update the GameState timer visibility
+                  context.read<GameState>().toggleTimer();
+                },
               ),
               SwitchListTile(
                 title: const Text('Show Mistakes'),
                 value: settings.showMistakes,
-                onChanged: (value) => settings.toggleMistakes(),
+                onChanged: (value) {
+                  settings.toggleMistakes();
+                },
               ),
             ],
           );

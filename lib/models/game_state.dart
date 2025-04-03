@@ -267,6 +267,7 @@ class GameState extends ChangeNotifier {
     // If we get here, the puzzle is complete
     _completionTime = _elapsedTime;
     _completionMistakes = mistakes;
+    stopTimer(); // Stop the timer when puzzle is complete
     return true;
   }
 } 
