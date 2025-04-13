@@ -6,6 +6,7 @@ class SudokuCell extends StatelessWidget {
   final bool isInitial;
   final bool isSelected;
   final bool isHighlighted;
+  final bool isSameNumber;
   final bool isInvalid;
   final bool showTopBorder;
   final bool showBottomBorder;
@@ -20,6 +21,7 @@ class SudokuCell extends StatelessWidget {
     required this.isInitial,
     required this.isSelected,
     required this.isHighlighted,
+    this.isSameNumber = false,
     required this.isInvalid,
     required this.showTopBorder,
     required this.showBottomBorder,
@@ -61,7 +63,7 @@ class SudokuCell extends StatelessWidget {
               Text(
                 solutionValue.toString(),
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 24,
                   color: Colors.grey.withOpacity(0.3),
                 ),
               ),
@@ -69,7 +71,7 @@ class SudokuCell extends StatelessWidget {
               Text(
                 value.toString(),
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: 24,
                   fontWeight: isInitial ? FontWeight.bold : FontWeight.normal,
                   color: _getTextColor(context),
                 ),
@@ -84,8 +86,11 @@ class SudokuCell extends StatelessWidget {
     if (isSelected) {
       return Theme.of(context).colorScheme.primaryContainer;
     }
+    if (isSameNumber) {
+      return Theme.of(context).colorScheme.secondary.withOpacity(0.3);
+    }
     if (isHighlighted) {
-      return Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3);
+      return Theme.of(context).colorScheme.primaryContainer.withOpacity(0.45);
     }
     return Colors.transparent;
   }
