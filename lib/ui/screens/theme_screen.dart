@@ -7,6 +7,19 @@ import '../widgets/sudoku_grid.dart';
 import '../widgets/number_input_row.dart';
 
 class ThemeScreen extends StatelessWidget {
+  // Static preview data to show both initial and player numbers
+  static const List<List<bool>> previewInitialCells = [
+    [true,  false, true,  false, false, true,  false, true,  false],
+    [false, true,  false, true,  false, false, true,  false, true],
+    [true,  false, true,  false, true,  false, false, true,  false],
+    [false, true,  false, false, false, true,  true,  false, false],
+    [true,  false, false, true,  true,  true,  false, false, true],
+    [false, false, true,  true,  false, false, false, true,  false],
+    [false, true,  false, false, true,  false, true,  false, true],
+    [true,  false, true,  false, false, true,  false, true,  false],
+    [false, true,  false, true,  false, false, true,  false, true],
+  ];
+
   const ThemeScreen({Key? key}) : super(key: key);
 
   @override
@@ -27,8 +40,8 @@ class ThemeScreen extends StatelessWidget {
             backgroundColor: Colors.transparent,
             appBar: AppBar(
               title: const Text('Themes'),
-              backgroundColor: currentTheme.primaryColor,
-              foregroundColor: currentTheme.textColor,
+              backgroundColor: currentTheme.topBarColor,
+              foregroundColor: currentTheme.topBarFontColor,
             ),
             body: Column(
               children: [
@@ -37,6 +50,7 @@ class ThemeScreen extends StatelessWidget {
                 const SudokuGrid(
                   isPreview: true,
                   showSolution: false,
+                  previewInitialCells: previewInitialCells,
                 ),
                 const SizedBox(height: 20),
                 // Number input row for preview

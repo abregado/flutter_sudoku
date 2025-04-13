@@ -101,14 +101,15 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
         backgroundColor: Colors.transparent,
         appBar: AppBar(
           title: const Text('Sudoku'),
-          backgroundColor: currentTheme.primaryColor,
-          foregroundColor: currentTheme.textColor,
+          backgroundColor: currentTheme.topBarColor,
+          foregroundColor: currentTheme.topBarFontColor,
+          iconTheme: IconThemeData(color: currentTheme.iconButtonColor),
           actions: [
             if (const bool.fromEnvironment('dart.vm.product') == false)
               IconButton(
                 icon: Icon(
                   _showSolution ? Icons.visibility_off : Icons.visibility,
-                  color: _showSolution ? currentTheme.primaryColor : currentTheme.textColor,
+                  color: _showSolution ? currentTheme.primaryColor : currentTheme.iconButtonColor,
                 ),
                 onPressed: () {
                   setState(() {

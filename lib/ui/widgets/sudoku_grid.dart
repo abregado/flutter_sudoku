@@ -7,11 +7,13 @@ import 'sudoku_cell.dart';
 class SudokuGrid extends StatelessWidget {
   final bool showSolution;
   final bool isPreview;
+  final List<List<bool>>? previewInitialCells;
   
   const SudokuGrid({
     super.key,
     this.showSolution = false,
     this.isPreview = false,
+    this.previewInitialCells,
   });
 
   @override
@@ -27,7 +29,7 @@ class SudokuGrid extends StatelessWidget {
               color: currentTheme.backgroundColor,
               border: Border.all(
                 color: currentTheme.gridLineColor,
-                width: 2.0,
+                width: currentTheme.gridSquareBorderThickness * 2,
               ),
             ),
             child: GridView.builder(
@@ -51,10 +53,13 @@ class SudokuGrid extends StatelessWidget {
 
   Widget _buildCell(BuildContext context, int row, int col) {
     final gameState = context.watch<GameState>();
+    final currentTheme = context.watch<ThemeProvider>().currentTheme;
     final value = isPreview 
         ? ((row * 3 + row ~/ 3 + col) % 9 + 1) 
         : gameState.grid[row][col];
-    final isInitial = isPreview ? true : gameState.initialCells[row][col];
+    final isInitial = isPreview 
+        ? (previewInitialCells?[row][col] ?? true)
+        : gameState.initialCells[row][col];
     final isSelected = isPreview 
         ? (row == 4 && col == 4)
         : (gameState.selectedRow == row && gameState.selectedCol == col);
@@ -83,6 +88,7 @@ class SudokuGrid extends StatelessWidget {
       showBottomBorder: row % 3 == 2,
       showLeftBorder: col % 3 == 0,
       showRightBorder: col % 3 == 2,
+      borderThickness: currentTheme.gridSquareBorderThickness,
       onTap: isPreview ? null : () => gameState.selectCell(row, col),
     );
   }

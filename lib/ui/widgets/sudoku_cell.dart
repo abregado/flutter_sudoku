@@ -15,6 +15,7 @@ class SudokuCell extends StatelessWidget {
   final bool showBottomBorder;
   final bool showLeftBorder;
   final bool showRightBorder;
+  final double borderThickness;
   final VoidCallback? onTap;
 
   const SudokuCell({
@@ -30,6 +31,7 @@ class SudokuCell extends StatelessWidget {
     required this.showBottomBorder,
     required this.showLeftBorder,
     required this.showRightBorder,
+    required this.borderThickness,
     required this.onTap,
   });
 
@@ -44,19 +46,19 @@ class SudokuCell extends StatelessWidget {
           border: Border(
             top: BorderSide(
               color: currentTheme.gridLineColor,
-              width: showTopBorder ? 2.0 : 0.5,
+              width: showTopBorder ? borderThickness * 2 : borderThickness,
             ),
             bottom: BorderSide(
               color: currentTheme.gridLineColor,
-              width: showBottomBorder ? 2.0 : 0.5,
+              width: showBottomBorder ? borderThickness * 2 : borderThickness,
             ),
             left: BorderSide(
               color: currentTheme.gridLineColor,
-              width: showLeftBorder ? 2.0 : 0.5,
+              width: showLeftBorder ? borderThickness * 2 : borderThickness,
             ),
             right: BorderSide(
               color: currentTheme.gridLineColor,
-              width: showRightBorder ? 2.0 : 0.5,
+              width: showRightBorder ? borderThickness * 2 : borderThickness,
             ),
           ),
         ),
@@ -97,7 +99,7 @@ class SudokuCell extends StatelessWidget {
       return currentTheme.relatedCellColor;
     }
     if (isHighlighted && settings.showRowSquareHighlighting) {
-      return currentTheme.relatedCellColor;
+      return currentTheme.rowSquareHighlightColor;
     }
     return Colors.transparent;
   }

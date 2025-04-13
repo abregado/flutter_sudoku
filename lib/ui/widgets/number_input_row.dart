@@ -52,14 +52,14 @@ class NumberInputRow extends StatelessWidget {
                 color: isSelected 
                     ? currentTheme.selectedCellColor 
                     : (shouldGrey 
-                        ? currentTheme.backgroundColor 
+                        ? currentTheme.greyedNumberInputBackgroundColor 
                         : currentTheme.relatedCellColor),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
                   color: isSelected 
                       ? currentTheme.primaryColor 
                       : (shouldGrey 
-                          ? currentTheme.gridLineColor 
+                          ? currentTheme.greyedNumberInputBorderColor 
                           : currentTheme.secondaryColor),
                   width: isSelected ? 2 : 1,
                 ),
@@ -72,7 +72,7 @@ class NumberInputRow extends StatelessWidget {
                     color: isSelected 
                         ? currentTheme.primaryColor 
                         : (shouldGrey 
-                            ? currentTheme.gridLineColor 
+                            ? currentTheme.greyedNumberInputTextColor 
                             : currentTheme.textColor),
                     fontWeight: FontWeight.bold,
                   ),
@@ -95,17 +95,17 @@ class NumberInputRow extends StatelessWidget {
         child: Container(
           margin: const EdgeInsets.all(2),
           decoration: BoxDecoration(
-            color: currentTheme.backgroundColor,
+            color: currentTheme.clearNumberInputButtonBackgroundColor,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: currentTheme.gridLineColor,
-              width: 1,
+              color: currentTheme.clearNumberInputButtonBorderColor,
+              width: 1.5,
             ),
           ),
           child: Icon(
             Icons.clear,
             size: size * 0.5,
-            color: currentTheme.textColor,
+            color: currentTheme.clearNumberInputButtonTextColor,
           ),
         ),
       ),
