@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/game_state.dart';
+import '../../providers/theme_provider.dart';
 import 'sudoku_cell.dart';
 
 class SudokuGrid extends StatelessWidget {
   final bool showSolution;
+  final bool isPreview;
   
   const SudokuGrid({
     super.key,
     this.showSolution = false,
+    this.isPreview = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = context.watch<ThemeProvider>().currentTheme;
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
@@ -20,9 +24,14 @@ class SudokuGrid extends StatelessWidget {
           aspectRatio: 1,
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: currentTheme.backgroundColor,
+              border: Border.all(
+                color: currentTheme.gridLineColor,
+                width: 2.0,
+              ),
             ),
             child: GridView.builder(
+              physics: isPreview ? const NeverScrollableScrollPhysics() : null,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 9,
                 childAspectRatio: 1,
@@ -42,16 +51,29 @@ class SudokuGrid extends StatelessWidget {
 
   Widget _buildCell(BuildContext context, int row, int col) {
     final gameState = context.watch<GameState>();
-    final value = gameState.grid[row][col];
-    final isInitial = gameState.initialCells[row][col];
-    final isSelected = gameState.selectedRow == row && gameState.selectedCol == col;
-    final isHighlighted = _isHighlighted(gameState, row, col);
-    final isSameNumber = _hasSameNumber(gameState, row, col);
-    final isInvalid = value != null && !gameState.isValidMove(row, col, value);
+    final value = isPreview 
+        ? ((row * 3 + row ~/ 3 + col) % 9 + 1) 
+        : gameState.grid[row][col];
+    final isInitial = isPreview ? true : gameState.initialCells[row][col];
+    final isSelected = isPreview 
+        ? (row == 4 && col == 4)
+        : (gameState.selectedRow == row && gameState.selectedCol == col);
+    final isHighlighted = isPreview 
+        ? _isHighlightedPreview(row, col) 
+        : _isHighlighted(gameState, row, col);
+    final isSameNumber = isPreview 
+        ? _hasSameNumberPreview(row, col) 
+        : _hasSameNumber(gameState, row, col);
+    final isInvalid = isPreview 
+        ? false 
+        : (value != null && !gameState.isValidMove(row, col, value));
+    final solutionValue = isPreview 
+        ? null 
+        : (showSolution ? gameState.solution[row][col] : null);
     
     return SudokuCell(
       value: value,
-      solutionValue: showSolution ? gameState.solution[row][col] : null,
+      solutionValue: solutionValue,
       isInitial: isInitial,
       isSelected: isSelected,
       isHighlighted: isHighlighted,
@@ -61,7 +83,7 @@ class SudokuGrid extends StatelessWidget {
       showBottomBorder: row % 3 == 2,
       showLeftBorder: col % 3 == 0,
       showRightBorder: col % 3 == 2,
-      onTap: () => gameState.selectCell(row, col),
+      onTap: isPreview ? null : () => gameState.selectCell(row, col),
     );
   }
   
@@ -87,6 +109,15 @@ class SudokuGrid extends StatelessWidget {
            !(row == gameState.selectedRow! && col == gameState.selectedCol!);
   }
 
+  bool _hasSameNumberPreview(int row, int col) {
+    const selectedRow = 4;
+    const selectedCol = 4;
+    final selectedValue = ((selectedRow * 3 + selectedRow ~/ 3 + selectedCol) % 9 + 1);
+    final currentValue = ((row * 3 + row ~/ 3 + col) % 9 + 1);
+    
+    return selectedValue == currentValue && !(row == selectedRow && col == selectedCol);
+  }
+
   bool _isHighlighted(GameState gameState, int row, int col) {
     if (gameState.selectedRow == null || gameState.selectedCol == null) {
       return false;
@@ -99,6 +130,21 @@ class SudokuGrid extends StatelessWidget {
         (gameState.selectedRow == row || 
          gameState.selectedCol == col || 
          _isInSameBox(row, col, gameState.selectedRow!, gameState.selectedCol!));
+    
+    return isHighlighted;
+  }
+
+  bool _isHighlightedPreview(int row, int col) {
+    const selectedRow = 4;
+    const selectedCol = 4;
+    
+    final isSelected = row == selectedRow && col == selectedCol;
+    
+    // Check if this cell should be highlighted (same row, column, or 3x3 box)
+    final isHighlighted = isSelected || 
+        (selectedRow == row || 
+         selectedCol == col || 
+         _isInSameBox(row, col, selectedRow, selectedCol));
     
     return isHighlighted;
   }

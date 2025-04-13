@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/puzzle_settings.dart';
+import '../../providers/theme_provider.dart';
 
 class SudokuCell extends StatelessWidget {
   final int? value;
@@ -14,7 +15,7 @@ class SudokuCell extends StatelessWidget {
   final bool showBottomBorder;
   final bool showLeftBorder;
   final bool showRightBorder;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   const SudokuCell({
     super.key,
@@ -34,6 +35,7 @@ class SudokuCell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = context.watch<ThemeProvider>().currentTheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -41,20 +43,20 @@ class SudokuCell extends StatelessWidget {
           color: _getBackgroundColor(context),
           border: Border(
             top: BorderSide(
-              color: Theme.of(context).dividerColor,
-              width: showTopBorder ? 1.0 : 0.0,
+              color: currentTheme.gridLineColor,
+              width: showTopBorder ? 2.0 : 0.5,
             ),
             bottom: BorderSide(
-              color: Theme.of(context).dividerColor,
-              width: showBottomBorder ? 1.0 : 0.0,
+              color: currentTheme.gridLineColor,
+              width: showBottomBorder ? 2.0 : 0.5,
             ),
             left: BorderSide(
-              color: Theme.of(context).dividerColor,
-              width: showLeftBorder ? 1.0 : 0.0,
+              color: currentTheme.gridLineColor,
+              width: showLeftBorder ? 2.0 : 0.5,
             ),
             right: BorderSide(
-              color: Theme.of(context).dividerColor,
-              width: showRightBorder ? 1.0 : 0.0,
+              color: currentTheme.gridLineColor,
+              width: showRightBorder ? 2.0 : 0.5,
             ),
           ),
         ),
@@ -66,7 +68,7 @@ class SudokuCell extends StatelessWidget {
                 solutionValue.toString(),
                 style: TextStyle(
                   fontSize: 24,
-                  color: Colors.grey.withOpacity(0.3),
+                  color: currentTheme.textColor.withOpacity(0.3),
                 ),
               ),
             if (value != null)
@@ -86,26 +88,29 @@ class SudokuCell extends StatelessWidget {
 
   Color _getBackgroundColor(BuildContext context) {
     final settings = context.watch<PuzzleSettings>();
+    final currentTheme = context.watch<ThemeProvider>().currentTheme;
     
     if (isSelected) {
-      return Theme.of(context).colorScheme.primaryContainer;
+      return currentTheme.selectedCellColor;
     }
     if (isSameNumber && settings.showSameNumberHighlighting) {
-      return Theme.of(context).colorScheme.secondary.withOpacity(0.3);
+      return currentTheme.relatedCellColor;
     }
     if (isHighlighted && settings.showRowSquareHighlighting) {
-      return Theme.of(context).colorScheme.primaryContainer.withOpacity(0.45);
+      return currentTheme.relatedCellColor;
     }
     return Colors.transparent;
   }
 
   Color _getTextColor(BuildContext context) {
+    final currentTheme = context.watch<ThemeProvider>().currentTheme;
+    
     if (isInvalid) {
-      return Theme.of(context).colorScheme.error;
+      return Colors.red;
     }
     if (isInitial) {
-      return Theme.of(context).colorScheme.onSurface;
+      return currentTheme.textColor;
     }
-    return Theme.of(context).colorScheme.onSurface;
+    return currentTheme.inputTextColor;
   }
 } 

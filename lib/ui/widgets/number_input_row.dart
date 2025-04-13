@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/game_state.dart';
 import '../../models/puzzle_settings.dart';
+import '../../providers/theme_provider.dart';
 
 class NumberInputRow extends StatelessWidget {
-  const NumberInputRow({super.key});
+  final int? selectedNumber;
+
+  const NumberInputRow({
+    super.key,
+    this.selectedNumber,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,24 +34,34 @@ class NumberInputRow extends StatelessWidget {
   }
 
   Widget _buildNumberButton(BuildContext context, int number, double size) {
-    return Consumer2<GameState, PuzzleSettings>(
-      builder: (context, gameState, settings, child) {
-        final isDisabled = _isNumberDisabled(gameState, number);
+    return Consumer3<GameState, PuzzleSettings, ThemeProvider>(
+      builder: (context, gameState, settings, themeProvider, child) {
+        final currentTheme = themeProvider.currentTheme;
+        final isDisabled = selectedNumber != null ? false : _isNumberDisabled(gameState, number);
         final shouldGrey = settings.showFinishedNumbers && isDisabled;
+        final isSelected = selectedNumber == number;
         
         return SizedBox(
           width: size,
           height: size,
           child: GestureDetector(
-            onTap: isDisabled ? null : () => gameState.makeMove(number),
+            onTap: selectedNumber != null ? null : (isDisabled ? null : () => gameState.makeMove(number)),
             child: Container(
               margin: const EdgeInsets.all(2),
               decoration: BoxDecoration(
-                color: shouldGrey ? Colors.grey[200] : Colors.blue[50],
+                color: isSelected 
+                    ? currentTheme.selectedCellColor 
+                    : (shouldGrey 
+                        ? currentTheme.backgroundColor 
+                        : currentTheme.relatedCellColor),
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: shouldGrey ? Colors.grey[300]! : Colors.blue[200]!,
-                  width: 1,
+                  color: isSelected 
+                      ? currentTheme.primaryColor 
+                      : (shouldGrey 
+                          ? currentTheme.gridLineColor 
+                          : currentTheme.secondaryColor),
+                  width: isSelected ? 2 : 1,
                 ),
               ),
               child: Center(
@@ -53,7 +69,11 @@ class NumberInputRow extends StatelessWidget {
                   number.toString(),
                   style: TextStyle(
                     fontSize: size * 0.5,
-                    color: shouldGrey ? Colors.grey[400] : Colors.blue[700],
+                    color: isSelected 
+                        ? currentTheme.primaryColor 
+                        : (shouldGrey 
+                            ? currentTheme.gridLineColor 
+                            : currentTheme.textColor),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -66,25 +86,26 @@ class NumberInputRow extends StatelessWidget {
   }
 
   Widget _buildClearButton(BuildContext context, double size) {
+    final currentTheme = context.watch<ThemeProvider>().currentTheme;
     return SizedBox(
       width: size,
       height: size,
       child: GestureDetector(
-        onTap: () => context.read<GameState>().makeMove(null),
+        onTap: selectedNumber != null ? null : () => context.read<GameState>().makeMove(null),
         child: Container(
           margin: const EdgeInsets.all(2),
           decoration: BoxDecoration(
-            color: Colors.red[50],
+            color: currentTheme.backgroundColor,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: Colors.red[200]!,
+              color: currentTheme.gridLineColor,
               width: 1,
             ),
           ),
           child: Icon(
             Icons.clear,
             size: size * 0.5,
-            color: Colors.red[700],
+            color: currentTheme.textColor,
           ),
         ),
       ),
