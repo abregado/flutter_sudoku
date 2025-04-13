@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/game_state.dart';
+import '../../models/puzzle_settings.dart';
 
 class NumberInputRow extends StatelessWidget {
   const NumberInputRow({super.key});
@@ -27,9 +28,10 @@ class NumberInputRow extends StatelessWidget {
   }
 
   Widget _buildNumberButton(BuildContext context, int number, double size) {
-    return Consumer<GameState>(
-      builder: (context, gameState, child) {
+    return Consumer2<GameState, PuzzleSettings>(
+      builder: (context, gameState, settings, child) {
         final isDisabled = _isNumberDisabled(gameState, number);
+        final shouldGrey = settings.showFinishedNumbers && isDisabled;
         
         return SizedBox(
           width: size,
@@ -39,10 +41,10 @@ class NumberInputRow extends StatelessWidget {
             child: Container(
               margin: const EdgeInsets.all(2),
               decoration: BoxDecoration(
-                color: isDisabled ? Colors.grey[200] : Colors.blue[50],
+                color: shouldGrey ? Colors.grey[200] : Colors.blue[50],
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: isDisabled ? Colors.grey[300]! : Colors.blue[200]!,
+                  color: shouldGrey ? Colors.grey[300]! : Colors.blue[200]!,
                   width: 1,
                 ),
               ),
@@ -51,7 +53,7 @@ class NumberInputRow extends StatelessWidget {
                   number.toString(),
                   style: TextStyle(
                     fontSize: size * 0.5,
-                    color: isDisabled ? Colors.grey[400] : Colors.blue[700],
+                    color: shouldGrey ? Colors.grey[400] : Colors.blue[700],
                     fontWeight: FontWeight.bold,
                   ),
                 ),

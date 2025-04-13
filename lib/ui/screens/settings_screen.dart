@@ -67,6 +67,44 @@ class SettingsScreen extends StatelessWidget {
                   settings.toggleMistakes();
                 },
               ),
+              
+              const Divider(),
+              
+              // Hints Section
+              const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Text(
+                  'Hints',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              SwitchListTile(
+                title: const Text('Row/Square Highlighting'),
+                subtitle: const Text('Highlight related rows, columns, and squares'),
+                value: settings.showRowSquareHighlighting,
+                onChanged: (value) {
+                  settings.toggleRowSquareHighlighting();
+                },
+              ),
+              SwitchListTile(
+                title: const Text('Same Number Highlighting'),
+                subtitle: const Text('Highlight cells with the same number'),
+                value: settings.showSameNumberHighlighting,
+                onChanged: (value) {
+                  settings.toggleSameNumberHighlighting();
+                },
+              ),
+              SwitchListTile(
+                title: const Text('Finished Numbers'),
+                subtitle: const Text('Grey out numbers that have been fully placed'),
+                value: settings.showFinishedNumbers,
+                onChanged: (value) {
+                  settings.toggleFinishedNumbers();
+                },
+              ),
             ],
           );
         },

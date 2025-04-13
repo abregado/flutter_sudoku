@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../models/game_state.dart';
 import '../../models/puzzle_settings.dart';
 import '../../utils/puzzle_generator.dart';
@@ -22,6 +23,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    // Enable wakelock to keep screen on during gameplay
+    WakelockPlus.enable();
     // Start the timer when the screen is created
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<GameState>().startTimer();
@@ -31,6 +34,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    // Disable wakelock when leaving the game screen
+    WakelockPlus.disable();
     // Stop the timer when the screen is disposed
     context.read<GameState>().stopTimer();
     super.dispose();
@@ -41,8 +46,12 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     final gameState = context.read<GameState>();
     if (state == AppLifecycleState.paused) {
       gameState.stopTimer();
+      // Disable wakelock when app goes to background
+      WakelockPlus.disable();
     } else if (state == AppLifecycleState.resumed) {
       gameState.startTimer();
+      // Re-enable wakelock when app comes to foreground
+      WakelockPlus.enable();
     }
   }
   

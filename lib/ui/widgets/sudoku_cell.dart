@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../../models/puzzle_settings.dart';
 
 class SudokuCell extends StatelessWidget {
   final int? value;
@@ -83,13 +85,15 @@ class SudokuCell extends StatelessWidget {
   }
 
   Color _getBackgroundColor(BuildContext context) {
+    final settings = context.watch<PuzzleSettings>();
+    
     if (isSelected) {
       return Theme.of(context).colorScheme.primaryContainer;
     }
-    if (isSameNumber) {
+    if (isSameNumber && settings.showSameNumberHighlighting) {
       return Theme.of(context).colorScheme.secondary.withOpacity(0.3);
     }
-    if (isHighlighted) {
+    if (isHighlighted && settings.showRowSquareHighlighting) {
       return Theme.of(context).colorScheme.primaryContainer.withOpacity(0.45);
     }
     return Colors.transparent;
