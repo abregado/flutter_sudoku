@@ -4,7 +4,12 @@ import '../../models/game_state.dart';
 import 'sudoku_cell.dart';
 
 class SudokuGrid extends StatelessWidget {
-  const SudokuGrid({super.key});
+  final bool showSolution;
+  
+  const SudokuGrid({
+    super.key,
+    this.showSolution = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +50,7 @@ class SudokuGrid extends StatelessWidget {
     
     return SudokuCell(
       value: value,
+      solutionValue: showSolution ? gameState.solution[row][col] : null,
       isInitial: isInitial,
       isSelected: isSelected,
       isHighlighted: isHighlighted,

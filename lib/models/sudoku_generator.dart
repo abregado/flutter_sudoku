@@ -77,6 +77,9 @@ class SudokuGenerator {
     // Create a list of all positions
     final positions = List.generate(81, (i) => [i ~/ 9, i % 9])..shuffle(_random);
     
+    // Keep track of cells we've successfully removed
+    final removedCells = <List<int>>[];
+    
     // Try removing each position
     for (final pos in positions) {
       final row = pos[0];
@@ -85,15 +88,41 @@ class SudokuGenerator {
       puzzle[row][col] = 0;
       
       // Check if the puzzle still has a unique solution
-      if (!_hasUniqueSolution(puzzle, solution)) {
+      if (_hasUniqueSolution(puzzle, solution)) {
+        removedCells.add([row, col]);
+      } else {
+        // If removing this number creates multiple solutions, put it back
         puzzle[row][col] = temp;
+      }
+      
+      // Periodically verify the overall puzzle still has a unique solution
+      if (removedCells.length % 5 == 0 && removedCells.isNotEmpty) {
+        // Create a test puzzle copy
+        final testPuzzle = List<List<int>>.generate(
+          9, 
+          (i) => List<int>.from(puzzle[i])
+        );
+        
+        // If the puzzle no longer has a unique solution, restore the last few removed cells
+        if (!_hasUniqueSolution(testPuzzle, solution)) {
+          for (var i = 0; i < 5 && removedCells.isNotEmpty; i++) {
+            final lastRemoved = removedCells.removeLast();
+            puzzle[lastRemoved[0]][lastRemoved[1]] = solution[lastRemoved[0]][lastRemoved[1]];
+          }
+          break;
+        }
       }
     }
   }
   
   static bool _hasUniqueSolution(List<List<int>> puzzle, List<List<int>> solution) {
     var solutions = 0;
-    _countSolutions(puzzle, solution, 0, 0, (solved) {
+    final puzzleCopy = List<List<int>>.generate(
+      9, 
+      (i) => List<int>.from(puzzle[i])
+    );
+    
+    _countSolutions(puzzleCopy, solution, 0, 0, (solved) {
       if (solved) solutions++;
       return solutions <= 1; // Stop if we find more than one solution
     });

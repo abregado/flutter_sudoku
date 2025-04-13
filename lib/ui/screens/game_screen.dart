@@ -16,6 +16,7 @@ class GameScreen extends StatefulWidget {
 
 class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   final PuzzleGenerator _generator = BacktrackingGenerator();
+  bool _showSolution = false;
   
   @override
   void initState() {
@@ -51,6 +52,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     
     final (grid, solution) = _generator.generatePuzzle(settings);
     gameState.startNewGameWithPuzzle(grid, solution);
+    gameState.resetTimer();
     gameState.startTimer();
   }
   
@@ -71,6 +73,19 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
       appBar: AppBar(
         title: const Text('Sudoku'),
         actions: [
+          if (const bool.fromEnvironment('dart.vm.product') == false)
+            IconButton(
+              icon: Icon(
+                _showSolution ? Icons.visibility_off : Icons.visibility,
+                color: _showSolution ? Theme.of(context).colorScheme.primary : null,
+              ),
+              onPressed: () {
+                setState(() {
+                  _showSolution = !_showSolution;
+                });
+              },
+              tooltip: 'Toggle solution visibility',
+            ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: _openSettings,
@@ -122,7 +137,9 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: SudokuGrid(),
+                      child: SudokuGrid(
+                        showSolution: _showSolution,
+                      ),
                     ),
                   ),
                   Padding(

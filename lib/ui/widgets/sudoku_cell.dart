@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class SudokuCell extends StatelessWidget {
   final int? value;
+  final int? solutionValue;
   final bool isInitial;
   final bool isSelected;
   final bool isHighlighted;
@@ -15,6 +16,7 @@ class SudokuCell extends StatelessWidget {
   const SudokuCell({
     super.key,
     required this.value,
+    this.solutionValue,
     required this.isInitial,
     required this.isSelected,
     required this.isHighlighted,
@@ -52,15 +54,27 @@ class SudokuCell extends StatelessWidget {
             ),
           ),
         ),
-        child: Center(
-          child: Text(
-            value?.toString() ?? '',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: isInitial ? FontWeight.bold : FontWeight.normal,
-              color: _getTextColor(context),
-            ),
-          ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            if (solutionValue != null && value == null)
+              Text(
+                solutionValue.toString(),
+                style: TextStyle(
+                  fontSize: 20,
+                  color: Colors.grey.withOpacity(0.3),
+                ),
+              ),
+            if (value != null)
+              Text(
+                value.toString(),
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: isInitial ? FontWeight.bold : FontWeight.normal,
+                  color: _getTextColor(context),
+                ),
+              ),
+          ],
         ),
       ),
     );
