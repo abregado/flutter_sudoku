@@ -62,6 +62,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     final gameState = context.read<GameState>();
     
     final (grid, solution) = _generator.generatePuzzle(settings);
+    settings.updateCurrentDifficulty();
     gameState.startNewGameWithPuzzle(grid, solution);
     gameState.resetTimer();
     gameState.startTimer();
@@ -155,6 +156,19 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                               if (!settings.showMistakes) return const SizedBox.shrink();
                               return Text(
                                 'Mistakes: ${gameState.mistakes}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: currentTheme.uiTextColor,
+                                ),
+                                //Theme.of(context).textTheme.titleMedium,
+                              );
+                            },
+                          ),
+                          Consumer<PuzzleSettings>(
+                            builder: (context, settings, child) {
+                              var name = settings.currentDifficulty.name.toString();
+                              return Text(
+                                "${name[0].toUpperCase()}${name.substring(1).toLowerCase()}",
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: currentTheme.uiTextColor,

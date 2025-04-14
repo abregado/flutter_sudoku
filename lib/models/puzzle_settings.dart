@@ -11,7 +11,8 @@ enum Difficulty {
 class PuzzleSettings extends ChangeNotifier {
   final SharedPreferences _prefs;
   
-  Difficulty _difficulty = Difficulty.medium;
+  Difficulty _nextDifficulty = Difficulty.medium;
+  Difficulty _currentDifficulty = Difficulty.medium;
   bool _showTimer = true;
   bool _showMistakes = true;
   bool _showRowSquareHighlighting = true;
@@ -23,7 +24,8 @@ class PuzzleSettings extends ChangeNotifier {
   }
   
   Future<void> _loadSettings() async {
-    _difficulty = Difficulty.values[_prefs.getInt('difficulty') ?? 1];
+    _nextDifficulty = Difficulty.values[_prefs.getInt('n_difficulty') ?? 1];
+    _currentDifficulty = Difficulty.values[_prefs.getInt('c_difficulty') ?? 1];
     _showTimer = _prefs.getBool('showTimer') ?? true;
     _showMistakes = _prefs.getBool('showMistakes') ?? true;
     _showRowSquareHighlighting = _prefs.getBool('showRowSquareHighlighting') ?? true;
@@ -33,7 +35,8 @@ class PuzzleSettings extends ChangeNotifier {
   }
   
   Future<void> _saveSettings() async {
-    await _prefs.setInt('difficulty', _difficulty.index);
+    await _prefs.setInt('n_difficulty', _nextDifficulty.index);
+    await _prefs.setInt('c_difficulty', _currentDifficulty.index);
     await _prefs.setBool('showTimer', _showTimer);
     await _prefs.setBool('showMistakes', _showMistakes);
     await _prefs.setBool('showRowSquareHighlighting', _showRowSquareHighlighting);
@@ -41,7 +44,8 @@ class PuzzleSettings extends ChangeNotifier {
     await _prefs.setBool('showFinishedNumbers', _showFinishedNumbers);
   }
   
-  Difficulty get difficulty => _difficulty;
+  Difficulty get difficulty => _nextDifficulty;
+  Difficulty get currentDifficulty => _currentDifficulty;
   bool get showTimer => _showTimer;
   bool get showMistakes => _showMistakes;
   bool get showRowSquareHighlighting => _showRowSquareHighlighting;
@@ -50,7 +54,7 @@ class PuzzleSettings extends ChangeNotifier {
   
   // Number of cells to remove based on difficulty
   int get cellsToRemove {
-    switch (_difficulty) {
+    switch (_nextDifficulty) {
       case Difficulty.easy:
         return 30; // 51 cells filled
       case Difficulty.medium:
@@ -63,7 +67,13 @@ class PuzzleSettings extends ChangeNotifier {
   }
   
   void setDifficulty(Difficulty difficulty) {
-    _difficulty = difficulty;
+    _nextDifficulty = difficulty;
+    _saveSettings();
+    notifyListeners();
+  }
+
+  void updateCurrentDifficulty(){
+    _currentDifficulty = _nextDifficulty;
     _saveSettings();
     notifyListeners();
   }
