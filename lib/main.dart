@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: 'Flutter Sudoku',
             theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: currentTheme.primaryColor),
+              colorScheme: ColorScheme.fromSeed(seedColor: currentTheme.selectedCellColor),
               scaffoldBackgroundColor: currentTheme.backgroundColor,
               useMaterial3: true,
             ),
