@@ -9,6 +9,7 @@ class SudokuTheme {
   final Color rowSquareHighlightColor;
   final Color defaultCellBackgroundColor;
   final Color defaultCellTextColor;
+  final Color debugSolutionCellTextColor;
   final Color uiTextColor;
   final Color topBarColor;
   final Color topBarFontColor;
@@ -47,6 +48,7 @@ class SudokuTheme {
     this.greyedNumberInputBorderColor = const Color(0xFFE0E0E0),
     this.defaultCellBackgroundColor = Colors.white,
     this.defaultCellTextColor = Colors.black,
+    this.debugSolutionCellTextColor = Colors.grey,
     this.mistakeTextColor = Colors.red,
     required this.clearNumberInputButtonBackgroundColor,
     required this.clearNumberInputButtonBorderColor,
@@ -115,6 +117,7 @@ class SudokuTheme {
     clearNumberInputButtonBackgroundColor: Color(0xFF56FDCF),
     clearNumberInputButtonBorderColor: Color(0xFF569F8B),
     clearNumberInputButtonTextColor: Color(0xFF569F8B),
+    debugSolutionCellTextColor: Color(0xFFB7A671),
     backgroundImage: 'assets/images/sakura_bg.png',
   );
 

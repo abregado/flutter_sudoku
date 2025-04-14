@@ -113,8 +113,8 @@ class SudokuCell extends StatelessWidget {
     if (isInvalid) {
       return currentTheme.mistakeTextColor;
     }
-    if (isInitial) {
-      return currentTheme.defaultCellTextColor;
+    if (solutionValue != null && value == null) {
+      return currentTheme.debugSolutionCellTextColor;
     }
     return currentTheme.defaultCellTextColor;
   }
