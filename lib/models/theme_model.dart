@@ -9,11 +9,18 @@ class SudokuTheme {
   final Color selectedCellColor;
   final Color relatedCellColor;
   final Color rowSquareHighlightColor;
-  final Color textColor;
+  final Color defaultCellBackgroundColor;
+  final Color defaultCellTextColor;
+  final Color uiTextColor;
   final Color inputTextColor;
   final Color topBarColor;
   final Color topBarFontColor;
   final Color iconButtonColor;
+  final Color disabledIconButtonColor;
+  final Color mistakeTextColor;
+  final Color inputNumberInputBackgroundColor;
+  final Color inputNumberInputTextColor;
+  final Color inputNumberInputBorderColor;
   final Color greyedNumberInputBackgroundColor;
   final Color greyedNumberInputTextColor;
   final Color greyedNumberInputBorderColor;
@@ -32,14 +39,21 @@ class SudokuTheme {
     required this.selectedCellColor,
     required this.relatedCellColor,
     required this.rowSquareHighlightColor,
-    required this.textColor,
+    this.uiTextColor = Colors.black,
     required this.inputTextColor,
     required this.topBarColor,
     required this.topBarFontColor,
     required this.iconButtonColor,
-    required this.greyedNumberInputBackgroundColor,
-    required this.greyedNumberInputTextColor,
-    required this.greyedNumberInputBorderColor,
+    this.disabledIconButtonColor = Colors.grey,
+    required this.inputNumberInputBackgroundColor,
+    required this.inputNumberInputTextColor,
+    required this.inputNumberInputBorderColor,
+    this.greyedNumberInputBackgroundColor = const Color(0xFFF5F5F5),
+    this.greyedNumberInputTextColor = const Color(0xFFBDBDBD),
+    this.greyedNumberInputBorderColor = const Color(0xFFE0E0E0),
+    this.defaultCellBackgroundColor = Colors.white,
+    this.defaultCellTextColor = Colors.black,
+    this.mistakeTextColor = Colors.red,
     required this.clearNumberInputButtonBackgroundColor,
     required this.clearNumberInputButtonBorderColor,
     required this.clearNumberInputButtonTextColor,
@@ -50,21 +64,21 @@ class SudokuTheme {
   // Predefined themes
   static final standard = SudokuTheme(
     name: 'Standard',
-    primaryColor: Colors.blue,
-    secondaryColor: Colors.blue.shade200,
+    primaryColor: Colors.white,
+    secondaryColor: Colors.white,
     backgroundColor: Colors.white,
     gridLineColor: Colors.black54,
-    selectedCellColor: Colors.blue.withOpacity(0.5),
-    relatedCellColor: Colors.blue.withOpacity(0.3),
-    rowSquareHighlightColor: Colors.blue.withOpacity(0.2),
-    textColor: Colors.black87,
-    inputTextColor: Colors.blue.shade900,
+    selectedCellColor: const Color(0xFF7CB7E5),
+    relatedCellColor: const Color(0xFFC3C9CE),
+    rowSquareHighlightColor: const Color(0xFFD6ECFD),
+    uiTextColor: Colors.black87,
+    inputTextColor: Colors.black,
     topBarColor: Colors.transparent,
     topBarFontColor: Colors.black87,
     iconButtonColor: Colors.black87,
-    greyedNumberInputBackgroundColor: Color(0xFFF5F5F5),
-    greyedNumberInputTextColor: Color(0xFFBDBDBD),
-    greyedNumberInputBorderColor: Color(0xFFE0E0E0),
+    inputNumberInputBackgroundColor: Colors.white,
+    inputNumberInputTextColor: Colors.black,
+    inputNumberInputBorderColor: Colors.black,
     clearNumberInputButtonBackgroundColor: Colors.red.shade100,
     clearNumberInputButtonBorderColor: Colors.red.shade300,
     clearNumberInputButtonTextColor: Colors.red.shade700,
@@ -79,62 +93,65 @@ class SudokuTheme {
     selectedCellColor: Colors.blueGrey.withOpacity(0.5),
     relatedCellColor: Colors.blueGrey.withOpacity(0.3),
     rowSquareHighlightColor: Colors.blueGrey.withOpacity(0.2),
-    textColor: Colors.white,
+    defaultCellBackgroundColor: Colors.black54,
+    defaultCellTextColor: Colors.white,
+    uiTextColor: Colors.white,
     inputTextColor: Colors.white,
     topBarColor: Colors.transparent,
     topBarFontColor: Colors.white,
     iconButtonColor: Colors.white,
-    greyedNumberInputBackgroundColor: Color(0xFF2C2C2C),
-    greyedNumberInputTextColor: Color(0xFF666666),
-    greyedNumberInputBorderColor: Color(0xFF444444),
-    clearNumberInputButtonBackgroundColor: Color(0xFF5C1919),
-    clearNumberInputButtonBorderColor: Color(0xFF8C2626),
-    clearNumberInputButtonTextColor: Color(0xFFFF4D4D),
+    inputNumberInputBackgroundColor: const Color(0xFF2C2C2C),
+    inputNumberInputTextColor: const Color(0xFF666666),
+    inputNumberInputBorderColor: const Color(0xFF444444),
+    clearNumberInputButtonBackgroundColor: const Color(0xFF5C1919),
+    clearNumberInputButtonBorderColor: const Color(0xFF8C2626),
+    clearNumberInputButtonTextColor: const Color(0xFFFF4D4D),
   );
 
-  static final japaneseSpringtime = SudokuTheme(
+  static const japaneseSpringtime = SudokuTheme(
     name: 'Japanese Springtime',
     primaryColor: Color(0xFFFFB7C5), // Sakura pink
     secondaryColor: Color(0xFFE4A7B2), // Darker sakura
-    backgroundColor: Color(0xFFFFF0F5), // Very light pink
+    backgroundColor: Colors.white,
     gridLineColor: Color(0xFF4A4A4A),
-    selectedCellColor: Color(0xFFFFB7C5).withOpacity(0.5),
-    relatedCellColor: Color(0xFFFFB7C5).withOpacity(0.3),
-    rowSquareHighlightColor: Color(0xFFFFB7C5).withOpacity(0.2),
-    textColor: Color(0xFF4A4A4A),
+    selectedCellColor: Color(0xFFFFB1C0),
+    relatedCellColor: Color(0xFFE9DADD),
+    rowSquareHighlightColor: Color(0xFFFFF3F5),
+    uiTextColor: Color(0xFF4A4A4A),
     inputTextColor: Color(0xFF4A4A4A),
     topBarColor: Colors.transparent,
     topBarFontColor: Color(0xFF4A4A4A),
+    mistakeTextColor: Color(0xFF569F8B),
     iconButtonColor: Color(0xFF4A4A4A),
-    greyedNumberInputBackgroundColor: Color(0xFFF8E7EA),
-    greyedNumberInputTextColor: Color(0xFFBEA4A8),
-    greyedNumberInputBorderColor: Color(0xFFE5D1D4),
-    clearNumberInputButtonBackgroundColor: Color(0xFFFF6B6B),
-    clearNumberInputButtonBorderColor: Color(0xFFFF8787),
-    clearNumberInputButtonTextColor: Colors.white,
+    inputNumberInputBackgroundColor: Color(0xFFFFB7C5),
+    inputNumberInputTextColor: Colors.black,
+    inputNumberInputBorderColor: Color(0xFFBA485E),
+    clearNumberInputButtonBackgroundColor: Color(0xFF56FDCF),
+    clearNumberInputButtonBorderColor: Color(0xFF569F8B),
+    clearNumberInputButtonTextColor: Color(0xFF569F8B),
     backgroundImage: 'assets/images/sakura_bg.png',
   );
 
   static final retro = SudokuTheme(
     name: 'Retro',
-    primaryColor: Color(0xFF00FF00), // Bright green
-    secondaryColor: Color(0xFF008800), // Darker green
+    primaryColor: const Color(0xFF00FF00), // Bright green
+    secondaryColor: const Color(0xFF008800), // Darker green
     backgroundColor: Colors.black,
-    gridLineColor: Color(0xFF00FF00),
-    selectedCellColor: Color(0xFF00FF00).withOpacity(0.5),
-    relatedCellColor: Color(0xFF00FF00).withOpacity(0.3),
-    rowSquareHighlightColor: Color(0xFF00FF00).withOpacity(0.2),
-    textColor: Color(0xFF00FF00),
-    inputTextColor: Color(0xFF00FF00),
+    gridLineColor: const Color(0xFF00FF00),
+    selectedCellColor: const Color(0xFF00FF00).withOpacity(0.5),
+    relatedCellColor: const Color(0xFF00FF00).withOpacity(0.3),
+    rowSquareHighlightColor: const Color(0xFF00FF00).withOpacity(0.2),
+    uiTextColor: const Color(0xFF00FF00),
+    inputTextColor: const Color(0xFF00FF00),
     topBarColor: Colors.transparent,
-    topBarFontColor: Color(0xFF00FF00),
-    iconButtonColor: Color(0xFF00FF00),
-    greyedNumberInputBackgroundColor: Color(0xFF0A1A0A),
-    greyedNumberInputTextColor: Color(0xFF1A331A),
-    greyedNumberInputBorderColor: Color(0xFF143314),
-    clearNumberInputButtonBackgroundColor: Color(0xFF330000),
-    clearNumberInputButtonBorderColor: Color(0xFFFF0000),
-    clearNumberInputButtonTextColor: Color(0xFFFF0000),
+    topBarFontColor: const Color(0xFF00FF00),
+    iconButtonColor: const Color(0xFF00FF00),
+    inputNumberInputBackgroundColor: const Color(0xFF0A1A0A),
+    inputNumberInputTextColor: const Color(0xFF1A331A),
+    inputNumberInputBorderColor: const Color(0xFF143314),
+    clearNumberInputButtonBackgroundColor: const Color(0xFF330000),
+    clearNumberInputButtonBorderColor: const Color(0xFFFF0000),
+    clearNumberInputButtonTextColor: const Color(0xFFFF0000),
   );
 
   static List<SudokuTheme> get allThemes => [

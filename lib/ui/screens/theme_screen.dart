@@ -54,7 +54,7 @@ class ThemeScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 20),
                 // Number input row for preview
-                const NumberInputRow(selectedNumber: 5),
+                const NumberInputRow(previewGreyedNumber: 5),
                 const SizedBox(height: 40),
                 // Theme carousel
                 SizedBox(
@@ -66,7 +66,7 @@ class ThemeScreen extends StatelessWidget {
                     itemBuilder: (context, index) {
                       final theme = SudokuTheme.allThemes[index];
                       return Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 0),
                         child: ThemeButton(
                           theme: theme,
                           isSelected: theme.name == currentTheme.name,
@@ -99,6 +99,7 @@ class ThemeButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final currentTheme = context.watch<ThemeProvider>().currentTheme;
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -107,7 +108,7 @@ class ThemeButton extends StatelessWidget {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? theme.primaryColor : Colors.transparent,
+            color: isSelected ? theme.selectedCellColor : Colors.transparent,
             width: 3,
           ),
         ),
@@ -117,21 +118,24 @@ class ThemeButton extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ColorSwatch(color: theme.primaryColor),
-                ColorSwatch(color: theme.secondaryColor),
+                ColorSwatch(color: theme.selectedCellColor),
+                ColorSwatch(color: theme.relatedCellColor),
               ],
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                ColorSwatch(color: theme.backgroundColor),
-                ColorSwatch(color: theme.textColor),
+                ColorSwatch(color: theme.rowSquareHighlightColor),
+                ColorSwatch(color: theme.defaultCellBackgroundColor),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               theme.name,
-              style: TextStyle(fontSize: 12),
+              style: TextStyle(
+                  fontSize: 12,
+                  color: currentTheme.uiTextColor
+              ),
               textAlign: TextAlign.center,
             ),
           ],

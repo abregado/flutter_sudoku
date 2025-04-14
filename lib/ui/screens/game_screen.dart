@@ -109,7 +109,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
               IconButton(
                 icon: Icon(
                   _showSolution ? Icons.visibility_off : Icons.visibility,
-                  color: _showSolution ? currentTheme.primaryColor : currentTheme.iconButtonColor,
+                  color: _showSolution ? Colors.grey : currentTheme.iconButtonColor,
                 ),
                 onPressed: () {
                   setState(() {
@@ -155,7 +155,11 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                               if (!settings.showMistakes) return const SizedBox.shrink();
                               return Text(
                                 'Mistakes: ${gameState.mistakes}',
-                                style: Theme.of(context).textTheme.titleMedium,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: currentTheme.uiTextColor,
+                                ),
+                                //Theme.of(context).textTheme.titleMedium,
                               );
                             },
                           ),
@@ -164,7 +168,10 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                               if (!settings.showTimer) return const SizedBox.shrink();
                               return Text(
                                 gameState.formattedTime,
-                                style: Theme.of(context).textTheme.titleMedium,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: currentTheme.uiTextColor,
+                                ),
                               );
                             },
                           ),

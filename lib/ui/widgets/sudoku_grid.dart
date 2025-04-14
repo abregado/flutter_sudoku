@@ -21,30 +21,20 @@ class SudokuGrid extends StatelessWidget {
     final currentTheme = context.watch<ThemeProvider>().currentTheme;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final width = constraints.maxWidth;
         return AspectRatio(
           aspectRatio: 1,
-          child: Container(
-            decoration: BoxDecoration(
-              color: currentTheme.backgroundColor,
-              border: Border.all(
-                color: currentTheme.gridLineColor,
-                width: currentTheme.gridSquareBorderThickness * 2,
-              ),
+          child: GridView.builder(
+            physics: isPreview ? const NeverScrollableScrollPhysics() : null,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 9,
+              childAspectRatio: 1,
             ),
-            child: GridView.builder(
-              physics: isPreview ? const NeverScrollableScrollPhysics() : null,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 9,
-                childAspectRatio: 1,
-              ),
-              itemCount: 81,
-              itemBuilder: (context, index) {
-                final row = index ~/ 9;
-                final col = index % 9;
-                return _buildCell(context, row, col);
-              },
-            ),
+            itemCount: 81,
+            itemBuilder: (context, index) {
+              final row = index ~/ 9;
+              final col = index % 9;
+              return _buildCell(context, row, col);
+            },
           ),
         );
       },

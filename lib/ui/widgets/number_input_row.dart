@@ -5,11 +5,11 @@ import '../../models/puzzle_settings.dart';
 import '../../providers/theme_provider.dart';
 
 class NumberInputRow extends StatelessWidget {
-  final int? selectedNumber;
+  final int? previewGreyedNumber;
 
   const NumberInputRow({
     super.key,
-    this.selectedNumber,
+    this.previewGreyedNumber,
   });
 
   @override
@@ -37,31 +37,26 @@ class NumberInputRow extends StatelessWidget {
     return Consumer3<GameState, PuzzleSettings, ThemeProvider>(
       builder: (context, gameState, settings, themeProvider, child) {
         final currentTheme = themeProvider.currentTheme;
-        final isDisabled = selectedNumber != null ? false : _isNumberDisabled(gameState, number);
+        final isDisabled = previewGreyedNumber != null && previewGreyedNumber == number? true : _isNumberDisabled(gameState, number);
         final shouldGrey = settings.showFinishedNumbers && isDisabled;
-        final isSelected = selectedNumber == number;
         
         return SizedBox(
           width: size,
           height: size,
           child: GestureDetector(
-            onTap: selectedNumber != null ? null : (isDisabled ? null : () => gameState.makeMove(number)),
+            onTap: previewGreyedNumber != null ? null : (isDisabled ? null : () => gameState.makeMove(number)),
             child: Container(
               margin: const EdgeInsets.all(2),
               decoration: BoxDecoration(
-                color: isSelected 
-                    ? currentTheme.selectedCellColor 
-                    : (shouldGrey 
+                color: shouldGrey
                         ? currentTheme.greyedNumberInputBackgroundColor 
-                        : currentTheme.relatedCellColor),
+                        : currentTheme.inputNumberInputBackgroundColor,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: isSelected 
-                      ? currentTheme.primaryColor 
-                      : (shouldGrey 
+                  color: shouldGrey
                           ? currentTheme.greyedNumberInputBorderColor 
-                          : currentTheme.secondaryColor),
-                  width: isSelected ? 2 : 1,
+                          : currentTheme.inputNumberInputBorderColor,
+                  width: 1,
                 ),
               ),
               child: Center(
@@ -69,11 +64,9 @@ class NumberInputRow extends StatelessWidget {
                   number.toString(),
                   style: TextStyle(
                     fontSize: size * 0.5,
-                    color: isSelected 
-                        ? currentTheme.primaryColor 
-                        : (shouldGrey 
+                    color: shouldGrey
                             ? currentTheme.greyedNumberInputTextColor 
-                            : currentTheme.textColor),
+                            : currentTheme.inputNumberInputTextColor,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -91,7 +84,7 @@ class NumberInputRow extends StatelessWidget {
       width: size,
       height: size,
       child: GestureDetector(
-        onTap: selectedNumber != null ? null : () => context.read<GameState>().makeMove(null),
+        onTap: previewGreyedNumber != null ? null : () => context.read<GameState>().makeMove(null),
         child: Container(
           margin: const EdgeInsets.all(2),
           decoration: BoxDecoration(

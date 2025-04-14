@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/puzzle_settings.dart';
@@ -70,7 +72,7 @@ class SudokuCell extends StatelessWidget {
                 solutionValue.toString(),
                 style: TextStyle(
                   fontSize: 24,
-                  color: currentTheme.textColor.withOpacity(0.3),
+                  color: _getTextColor(context),
                 ),
               ),
             if (value != null)
@@ -79,6 +81,7 @@ class SudokuCell extends StatelessWidget {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: isInitial ? FontWeight.bold : FontWeight.normal,
+                  fontStyle: isInvalid ? FontStyle.italic : FontStyle.normal,
                   color: _getTextColor(context),
                 ),
               ),
@@ -101,18 +104,18 @@ class SudokuCell extends StatelessWidget {
     if (isHighlighted && settings.showRowSquareHighlighting) {
       return currentTheme.rowSquareHighlightColor;
     }
-    return Colors.transparent;
+    return currentTheme.defaultCellBackgroundColor;
   }
 
   Color _getTextColor(BuildContext context) {
     final currentTheme = context.watch<ThemeProvider>().currentTheme;
     
     if (isInvalid) {
-      return Colors.red;
+      return currentTheme.mistakeTextColor;
     }
     if (isInitial) {
-      return currentTheme.textColor;
+      return currentTheme.defaultCellTextColor;
     }
-    return currentTheme.inputTextColor;
+    return currentTheme.defaultCellTextColor;
   }
 } 
