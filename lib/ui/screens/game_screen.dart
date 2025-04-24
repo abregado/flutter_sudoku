@@ -62,7 +62,6 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     final gameState = context.read<GameState>();
     
     final (grid, solution) = _generator.generatePuzzle(settings);
-    settings.updateCurrentDifficulty();
     gameState.startNewGameWithPuzzle(grid, solution);
     gameState.resetTimer();
     gameState.startTimer();
@@ -160,23 +159,10 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                                   fontSize: 16,
                                   color: currentTheme.uiTextColor,
                                 ),
-                                //Theme.of(context).textTheme.titleMedium,
                               );
                             },
                           ),
-                          Consumer<PuzzleSettings>(
-                            builder: (context, settings, child) {
-                              var name = settings.currentDifficulty.name.toString();
-                              return Text(
-                                "${name[0].toUpperCase()}${name.substring(1).toLowerCase()}",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: currentTheme.uiTextColor,
-                                ),
-                                //Theme.of(context).textTheme.titleMedium,
-                              );
-                            },
-                          ),
+                          const SizedBox(width: 16),
                           Consumer<PuzzleSettings>(
                             builder: (context, settings, child) {
                               if (!settings.showTimer) return const SizedBox.shrink();

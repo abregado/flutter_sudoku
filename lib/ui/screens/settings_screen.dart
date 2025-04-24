@@ -16,30 +16,6 @@ class SettingsScreen extends StatelessWidget {
         builder: (context, settings, child) {
           return ListView(
             children: [
-              // Difficulty Section
-              const Padding(
-                padding: EdgeInsets.all(16.0),
-                child: Text(
-                  'Difficulty',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              ...Difficulty.values.map((difficulty) => RadioListTile<Difficulty>(
-                title: Text(difficulty.name.toUpperCase()),
-                value: difficulty,
-                groupValue: settings.difficulty,
-                onChanged: (value) {
-                  if (value != null) {
-                    settings.setDifficulty(value);
-                  }
-                },
-              )),
-              
-              const Divider(),
-              
               // Display Options
               const Padding(
                 padding: EdgeInsets.all(16.0),

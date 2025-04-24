@@ -1,18 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-enum Difficulty {
-  easy,
-  medium,
-  hard,
-  expert
-}
+import 'dart:math';
 
 class PuzzleSettings extends ChangeNotifier {
   final SharedPreferences _prefs;
+  final Random _random = Random();
   
-  Difficulty _nextDifficulty = Difficulty.medium;
-  Difficulty _currentDifficulty = Difficulty.medium;
   bool _showTimer = true;
   bool _showMistakes = true;
   bool _showRowSquareHighlighting = true;
@@ -24,8 +17,6 @@ class PuzzleSettings extends ChangeNotifier {
   }
   
   Future<void> _loadSettings() async {
-    _nextDifficulty = Difficulty.values[_prefs.getInt('n_difficulty') ?? 1];
-    _currentDifficulty = Difficulty.values[_prefs.getInt('c_difficulty') ?? 1];
     _showTimer = _prefs.getBool('showTimer') ?? true;
     _showMistakes = _prefs.getBool('showMistakes') ?? true;
     _showRowSquareHighlighting = _prefs.getBool('showRowSquareHighlighting') ?? true;
@@ -35,8 +26,6 @@ class PuzzleSettings extends ChangeNotifier {
   }
   
   Future<void> _saveSettings() async {
-    await _prefs.setInt('n_difficulty', _nextDifficulty.index);
-    await _prefs.setInt('c_difficulty', _currentDifficulty.index);
     await _prefs.setBool('showTimer', _showTimer);
     await _prefs.setBool('showMistakes', _showMistakes);
     await _prefs.setBool('showRowSquareHighlighting', _showRowSquareHighlighting);
@@ -44,39 +33,14 @@ class PuzzleSettings extends ChangeNotifier {
     await _prefs.setBool('showFinishedNumbers', _showFinishedNumbers);
   }
   
-  Difficulty get difficulty => _nextDifficulty;
-  Difficulty get currentDifficulty => _currentDifficulty;
   bool get showTimer => _showTimer;
   bool get showMistakes => _showMistakes;
   bool get showRowSquareHighlighting => _showRowSquareHighlighting;
   bool get showSameNumberHighlighting => _showSameNumberHighlighting;
   bool get showFinishedNumbers => _showFinishedNumbers;
   
-  // Number of cells to remove based on difficulty
-  int get cellsToRemove {
-    switch (_nextDifficulty) {
-      case Difficulty.easy:
-        return 30; // 51 cells filled
-      case Difficulty.medium:
-        return 40; // 41 cells filled
-      case Difficulty.hard:
-        return 50; // 31 cells filled
-      case Difficulty.expert:
-        return 60; // 21 cells filled
-    }
-  }
-  
-  void setDifficulty(Difficulty difficulty) {
-    _nextDifficulty = difficulty;
-    _saveSettings();
-    notifyListeners();
-  }
-
-  void updateCurrentDifficulty(){
-    _currentDifficulty = _nextDifficulty;
-    _saveSettings();
-    notifyListeners();
-  }
+  // Random number of cells to remove between 30 and 60
+  int get cellsToRemove => _random.nextInt(31) + 30;
   
   void toggleTimer() {
     _showTimer = !_showTimer;
