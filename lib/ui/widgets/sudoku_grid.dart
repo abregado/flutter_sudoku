@@ -8,12 +8,18 @@ class SudokuGrid extends StatelessWidget {
   final bool showSolution;
   final bool isPreview;
   final List<List<bool>>? previewInitialCells;
+  final bool showPairs;
+  final bool showSingles;
+  final bool showTriples;
   
   const SudokuGrid({
     super.key,
     this.showSolution = false,
     this.isPreview = false,
     this.previewInitialCells,
+    this.showPairs = false,
+    this.showSingles = false,
+    this.showTriples = false,
   });
 
   @override
@@ -80,6 +86,11 @@ class SudokuGrid extends StatelessWidget {
       showRightBorder: col % 3 == 2,
       borderThickness: currentTheme.gridSquareBorderThickness,
       onTap: isPreview ? null : () => gameState.selectCell(row, col),
+      showPairs: showPairs,
+      showSingles: showSingles,
+      showTriples: showTriples,
+      cellRow: row,
+      cellCol: col,
     );
   }
   

@@ -20,6 +20,9 @@ class GameScreen extends StatefulWidget {
 class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   final PuzzleGenerator _generator = BacktrackingGenerator();
   bool _showSolution = false;
+  bool _showPairs = false;
+  bool _showSingles = false;
+  bool _showTriples = false;
   
   @override
   void initState() {
@@ -131,12 +134,6 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
               icon: const Icon(Icons.refresh),
               onPressed: _startNewGame,
             ),
-            IconButton(
-              icon: const Icon(Icons.undo),
-              onPressed: () {
-                context.read<GameState>().undo();
-              },
-            ),
           ],
         ),
         body: Consumer<GameState>(
@@ -183,7 +180,69 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                         padding: const EdgeInsets.all(16.0),
                         child: SudokuGrid(
                           showSolution: _showSolution,
+                          showPairs: _showPairs,
+                          showSingles: _showSingles,
+                          showTriples: _showTriples,
                         ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                _showSingles = !_showSingles;
+                                if (_showSingles) {
+                                  _showPairs = false;
+                                  _showTriples = false;
+                                }
+                              });
+                            },
+                            icon: Icon(_showSingles ? Icons.visibility_off : Icons.visibility),
+                            label: Text('Singles'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: currentTheme.inputNumberInputBackgroundColor,
+                              foregroundColor: currentTheme.inputNumberInputTextColor,
+                            ),
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                _showPairs = !_showPairs;
+                                if (_showPairs) {
+                                  _showSingles = false;
+                                  _showTriples = false;
+                                }
+                              });
+                            },
+                            icon: Icon(_showPairs ? Icons.visibility_off : Icons.visibility),
+                            label: Text('Pairs'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: currentTheme.inputNumberInputBackgroundColor,
+                              foregroundColor: currentTheme.inputNumberInputTextColor,
+                            ),
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                _showTriples = !_showTriples;
+                                if (_showTriples) {
+                                  _showSingles = false;
+                                  _showPairs = false;
+                                }
+                              });
+                            },
+                            icon: Icon(_showTriples ? Icons.visibility_off : Icons.visibility),
+                            label: Text('Triples'),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: currentTheme.inputNumberInputBackgroundColor,
+                              foregroundColor: currentTheme.inputNumberInputTextColor,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     Padding(
@@ -192,7 +251,15 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                         right: 16.0,
                         bottom: 16.0 + bottomPadding,
                       ),
-                      child: NumberInputRow(),
+                      child: NumberInputRow(
+                        onNumberSelected: () {
+                          if (_showPairs) {
+                            setState(() {
+                              _showPairs = false;
+                            });
+                          }
+                        },
+                      ),
                     ),
                   ],
                 ),

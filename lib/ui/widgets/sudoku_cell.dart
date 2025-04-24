@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../models/puzzle_settings.dart';
 import '../../providers/theme_provider.dart';
+import '../../models/game_state.dart';
 
 class SudokuCell extends StatelessWidget {
   final int? value;
@@ -19,6 +20,11 @@ class SudokuCell extends StatelessWidget {
   final bool showRightBorder;
   final double borderThickness;
   final VoidCallback? onTap;
+  final bool showPairs;
+  final bool showSingles;
+  final bool showTriples;
+  final int cellRow;
+  final int cellCol;
 
   const SudokuCell({
     super.key,
@@ -35,11 +41,18 @@ class SudokuCell extends StatelessWidget {
     required this.showRightBorder,
     required this.borderThickness,
     required this.onTap,
+    this.showPairs = false,
+    this.showSingles = false,
+    this.showTriples = false,
+    required this.cellRow,
+    required this.cellCol,
   });
 
   @override
   Widget build(BuildContext context) {
     final currentTheme = context.watch<ThemeProvider>().currentTheme;
+    final gameState = context.watch<GameState>();
+    
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -85,10 +98,84 @@ class SudokuCell extends StatelessWidget {
                   color: _getTextColor(context),
                 ),
               ),
+            if (value == null)
+              _buildCandidates(context, gameState),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildCandidates(BuildContext context, GameState gameState) {
+    final currentTheme = context.watch<ThemeProvider>().currentTheme;
+    
+    // Calculate candidates for this specific cell
+    final candidates = _getCandidates(gameState.grid, cellRow, cellCol);
+    
+    if (showSingles && candidates.length == 1) {
+      return Text(
+        candidates.first.toString(),
+        style: TextStyle(
+          fontSize: 12,
+          color: currentTheme.defaultCellTextColor.withOpacity(0.7),
+        ),
+      );
+    }
+    
+    if (showPairs && candidates.length == 2) {
+      return Text(
+        candidates.join(' '),
+        style: TextStyle(
+          fontSize: 12,
+          color: currentTheme.defaultCellTextColor.withOpacity(0.7),
+        ),
+      );
+    }
+    
+    if (showTriples && candidates.length == 3) {
+      return Text(
+        candidates.join(' '),
+        style: TextStyle(
+          fontSize: 12,
+          color: currentTheme.defaultCellTextColor.withOpacity(0.7),
+        ),
+      );
+    }
+    
+    return const SizedBox.shrink();
+  }
+
+  Set<int> _getCandidates(List<List<int?>> grid, int row, int col) {
+    final candidates = <int>{};
+    for (int num = 1; num <= 9; num++) {
+      if (_isSafe(grid, row, col, num)) {
+        candidates.add(num);
+      }
+    }
+    return candidates;
+  }
+
+  bool _isSafe(List<List<int?>> grid, int row, int col, int num) {
+    // Check row
+    for (int x = 0; x < 9; x++) {
+      if (grid[row][x] == num) return false;
+    }
+    
+    // Check column
+    for (int x = 0; x < 9; x++) {
+      if (grid[x][col] == num) return false;
+    }
+    
+    // Check 3x3 box
+    int startRow = row - row % 3;
+    int startCol = col - col % 3;
+    for (int i = 0; i < 3; i++) {
+      for (int j = 0; j < 3; j++) {
+        if (grid[i + startRow][j + startCol] == num) return false;
+      }
+    }
+    
+    return true;
   }
 
   Color _getBackgroundColor(BuildContext context) {

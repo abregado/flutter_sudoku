@@ -6,10 +6,12 @@ import '../../providers/theme_provider.dart';
 
 class NumberInputRow extends StatelessWidget {
   final int? previewGreyedNumber;
+  final VoidCallback? onNumberSelected;
 
   const NumberInputRow({
     super.key,
     this.previewGreyedNumber,
+    this.onNumberSelected,
   });
 
   @override
@@ -17,15 +19,26 @@ class NumberInputRow extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final buttonSize = width / 10; // 9 numbers + 1 clear button
+        final buttonSize = width / 5; // 5 buttons per row
         
         return SizedBox(
-          height: buttonSize,
-          child: Row(
+          height: buttonSize * 2, // Two rows
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ...List.generate(9, (index) => _buildNumberButton(context, index + 1, buttonSize)),
-              _buildClearButton(context, buttonSize),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ...List.generate(5, (index) => _buildNumberButton(context, index + 1, buttonSize)),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ...List.generate(4, (index) => _buildNumberButton(context, index + 6, buttonSize)),
+                  _buildClearButton(context, buttonSize),
+                ],
+              ),
             ],
           ),
         );
@@ -34,47 +47,47 @@ class NumberInputRow extends StatelessWidget {
   }
 
   Widget _buildNumberButton(BuildContext context, int number, double size) {
-    return Consumer3<GameState, PuzzleSettings, ThemeProvider>(
-      builder: (context, gameState, settings, themeProvider, child) {
-        final currentTheme = themeProvider.currentTheme;
-        final isDisabled = previewGreyedNumber != null && previewGreyedNumber == number? true : _isNumberDisabled(gameState, number);
-        final shouldGrey = settings.showFinishedNumbers && isDisabled;
-        
-        return SizedBox(
-          width: size,
-          height: size,
-          child: GestureDetector(
-            onTap: previewGreyedNumber != null ? null : (isDisabled ? null : () => gameState.makeMove(number)),
-            child: Container(
-              margin: const EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                color: shouldGrey
-                        ? currentTheme.greyedNumberInputBackgroundColor 
-                        : currentTheme.inputNumberInputBackgroundColor,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: shouldGrey
-                          ? currentTheme.greyedNumberInputBorderColor 
-                          : currentTheme.inputNumberInputBorderColor,
-                  width: 1,
-                ),
-              ),
-              child: Center(
-                child: Text(
-                  number.toString(),
-                  style: TextStyle(
-                    fontSize: size * 0.5,
-                    color: shouldGrey
-                            ? currentTheme.greyedNumberInputTextColor 
-                            : currentTheme.inputNumberInputTextColor,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+    final currentTheme = context.watch<ThemeProvider>().currentTheme;
+    final gameState = context.watch<GameState>();
+    final isDisabled = _isNumberDisabled(gameState, number);
+    
+    return SizedBox(
+      width: size,
+      height: size,
+      child: GestureDetector(
+        onTap: previewGreyedNumber != null || isDisabled
+            ? null
+            : () {
+                gameState.makeMove(number);
+                onNumberSelected?.call();
+              },
+        child: Container(
+          margin: const EdgeInsets.all(2),
+          decoration: BoxDecoration(
+            color: isDisabled
+                ? currentTheme.greyedNumberInputBackgroundColor
+                : currentTheme.inputNumberInputBackgroundColor,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: isDisabled
+                  ? currentTheme.greyedNumberInputBorderColor
+                  : currentTheme.inputNumberInputBorderColor,
+              width: 1.5,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              number.toString(),
+              style: TextStyle(
+                fontSize: size * 0.4,
+                color: isDisabled
+                    ? currentTheme.greyedNumberInputTextColor
+                    : currentTheme.inputNumberInputTextColor,
               ),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
