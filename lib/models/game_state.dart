@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class GameState extends ChangeNotifier {
   static const String _storageKey = 'game_state';
+  static const String _nextPuzzleKey = 'next_puzzle';
   
   // The Sudoku grid (9x9)
   List<List<int?>> grid = List.generate(9, (_) => List.filled(9, null));
@@ -34,10 +35,16 @@ class GameState extends ChangeNotifier {
   Duration? _completionTime;
   int _completionMistakes = 0;
   
+  // Next puzzle storage
+  List<List<int?>>? _nextGrid;
+  List<List<int>>? _nextSolution;
+  bool _isGeneratingNextPuzzle = false;
+  
   Duration get elapsedTime => _elapsedTime;
   bool get showTimer => _showTimer;
   Duration? get completionTime => _completionTime;
   int get completionMistakes => _completionMistakes;
+  bool get isGeneratingNextPuzzle => _isGeneratingNextPuzzle;
   
   // Constructor
   GameState() {
@@ -57,64 +64,132 @@ class GameState extends ChangeNotifier {
     _showTimer = other._showTimer;
     _completionTime = other._completionTime;
     _completionMistakes = other._completionMistakes;
+    _nextGrid = other._nextGrid != null 
+        ? List.generate(9, (i) => List.from(other._nextGrid![i]))
+        : null;
+    _nextSolution = other._nextSolution != null
+        ? List.generate(9, (i) => List.from(other._nextSolution![i]))
+        : null;
+    _isGeneratingNextPuzzle = other._isGeneratingNextPuzzle;
   }
   
   Future<void> _loadState() async {
     final prefs = await SharedPreferences.getInstance();
     final stateJson = prefs.getString(_storageKey);
+    final nextPuzzleJson = prefs.getString(_nextPuzzleKey);
     
     if (stateJson != null) {
-      final state = json.decode(stateJson);
-      
-      // Load grid
-      final gridData = state['grid'] as List;
-      grid = List.generate(9, (i) => 
-        List.generate(9, (j) => gridData[i][j] as int?));
-      
-      // Load solution
-      final solutionData = state['solution'] as List;
-      solution = List.generate(9, (i) => 
-        List.generate(9, (j) => solutionData[i][j] as int));
-      
-      // Load initial cells
-      final initialData = state['initialCells'] as List;
-      initialCells = List.generate(9, (i) => 
-        List.generate(9, (j) => initialData[i][j] as bool));
-      
-      // Load other state
-      selectedRow = state['selectedRow'] as int?;
-      selectedCol = state['selectedCol'] as int?;
+      final state = jsonDecode(stateJson) as Map<String, dynamic>;
+      grid = _parseGrid(state['grid'] as List);
+      solution = _parseSolution(state['solution'] as List);
+      initialCells = _parseInitialCells(state['initialCells'] as List);
       mistakes = state['mistakes'] as int;
-      startTime = state['startTime'] != null ? 
-        DateTime.parse(state['startTime'] as String) : null;
       _elapsedTime = Duration(seconds: state['elapsedTime'] as int);
       _showTimer = state['showTimer'] as bool;
-      _completionTime = state['completionTime'] != null ?
-        Duration(seconds: state['completionTime'] as int) : null;
+      _completionTime = state['completionTime'] != null 
+          ? Duration(seconds: state['completionTime'] as int)
+          : null;
       _completionMistakes = state['completionMistakes'] as int;
-      
-      notifyListeners();
     }
+    
+    if (nextPuzzleJson != null) {
+      final nextPuzzle = jsonDecode(nextPuzzleJson) as Map<String, dynamic>;
+      _nextGrid = _parseGrid(nextPuzzle['grid'] as List);
+      _nextSolution = _parseSolution(nextPuzzle['solution'] as List);
+    }
+    
+    notifyListeners();
   }
   
   Future<void> _saveState() async {
     final prefs = await SharedPreferences.getInstance();
-    
     final state = {
-      'grid': grid,
-      'solution': solution,
-      'initialCells': initialCells,
-      'selectedRow': selectedRow,
-      'selectedCol': selectedCol,
+      'grid': _serializeGrid(grid),
+      'solution': _serializeSolution(solution),
+      'initialCells': _serializeInitialCells(initialCells),
       'mistakes': mistakes,
-      'startTime': startTime?.toIso8601String(),
       'elapsedTime': _elapsedTime.inSeconds,
       'showTimer': _showTimer,
       'completionTime': _completionTime?.inSeconds,
       'completionMistakes': _completionMistakes,
     };
     
-    await prefs.setString(_storageKey, json.encode(state));
+    await prefs.setString(_storageKey, jsonEncode(state));
+    
+    if (_nextGrid != null && _nextSolution != null) {
+      final nextPuzzle = {
+        'grid': _serializeGrid(_nextGrid!),
+        'solution': _serializeSolution(_nextSolution!),
+      };
+      await prefs.setString(_nextPuzzleKey, jsonEncode(nextPuzzle));
+    }
+  }
+  
+  List<List<int?>> _parseGrid(List gridJson) {
+    return List.generate(9, (i) => 
+      List.generate(9, (j) => gridJson[i][j] as int?));
+  }
+  
+  List<List<int>> _parseSolution(List solutionJson) {
+    return List.generate(9, (i) => 
+      List.generate(9, (j) => solutionJson[i][j] as int));
+  }
+  
+  List<List<bool>> _parseInitialCells(List initialCellsJson) {
+    return List.generate(9, (i) => 
+      List.generate(9, (j) => initialCellsJson[i][j] as bool));
+  }
+  
+  List<List<dynamic>> _serializeGrid(List<List<int?>> grid) {
+    return List.generate(9, (i) => 
+      List.generate(9, (j) => grid[i][j]));
+  }
+  
+  List<List<dynamic>> _serializeSolution(List<List<int>> solution) {
+    return List.generate(9, (i) => 
+      List.generate(9, (j) => solution[i][j]));
+  }
+  
+  List<List<dynamic>> _serializeInitialCells(List<List<bool>> initialCells) {
+    return List.generate(9, (i) => 
+      List.generate(9, (j) => initialCells[i][j]));
+  }
+  
+  void startGeneratingNextPuzzle() {
+    if (_isGeneratingNextPuzzle) return;
+    _isGeneratingNextPuzzle = true;
+    notifyListeners();
+  }
+  
+  void setNextPuzzle(List<List<int?>> grid, List<List<int>> solution) {
+    _nextGrid = grid;
+    _nextSolution = solution;
+    _isGeneratingNextPuzzle = false;
+    _saveState();
+    notifyListeners();
+  }
+  
+  bool hasNextPuzzle() {
+    return _nextGrid != null && _nextSolution != null;
+  }
+  
+  void useNextPuzzle() {
+    if (!hasNextPuzzle()) return;
+    
+    grid = _nextGrid!;
+    solution = _nextSolution!;
+    initialCells = List.generate(9, (i) => 
+      List.generate(9, (j) => grid[i][j] != null));
+    selectedRow = null;
+    selectedCol = null;
+    mistakes = 0;
+    startTime = DateTime.now();
+    undoStack.clear();
+    _nextGrid = null;
+    _nextSolution = null;
+    
+    _saveState();
+    notifyListeners();
   }
   
   void toggleTimer() {

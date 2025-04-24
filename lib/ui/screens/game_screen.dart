@@ -23,6 +23,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   bool _showPairs = false;
   bool _showSingles = false;
   bool _showTriples = false;
+  bool _isNewPuzzleButtonEnabled = true;
+  double _generationProgress = 0.0;
   
   @override
   void initState() {
@@ -33,6 +35,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     // Start the timer when the screen is created
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<GameState>().startTimer();
+      _startGeneratingNextPuzzle();
     });
   }
   
@@ -60,14 +63,60 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     }
   }
   
+  Future<void> _startGeneratingNextPuzzle() async {
+    final gameState = context.read<GameState>();
+    if (gameState.isGeneratingNextPuzzle || gameState.hasNextPuzzle()) return;
+    
+    gameState.startGeneratingNextPuzzle();
+    setState(() {
+      _isNewPuzzleButtonEnabled = false;
+      _generationProgress = 0.0;
+    });
+    
+    try {
+      final settings = context.read<PuzzleSettings>();
+      final (grid, solution) = await _generator.generatePuzzleAsync(
+        settings,
+        (progress) {
+          setState(() {
+            _generationProgress = progress;
+          });
+        },
+      );
+      gameState.setNextPuzzle(grid, solution);
+      
+      setState(() {
+        _isNewPuzzleButtonEnabled = true;
+        _generationProgress = 1.0;
+      });
+      
+      // Flash the button to indicate it's ready
+      await Future.delayed(const Duration(milliseconds: 100));
+      setState(() {
+        _isNewPuzzleButtonEnabled = false;
+      });
+      await Future.delayed(const Duration(milliseconds: 100));
+      setState(() {
+        _isNewPuzzleButtonEnabled = true;
+      });
+    } catch (e) {
+      // If generation fails, try again
+      _startGeneratingNextPuzzle();
+    }
+  }
+  
   void _startNewGame() {
-    final settings = context.read<PuzzleSettings>();
     final gameState = context.read<GameState>();
     
-    final (grid, solution) = _generator.generatePuzzle(settings);
-    gameState.startNewGameWithPuzzle(grid, solution);
-    gameState.resetTimer();
-    gameState.startTimer();
+    if (gameState.hasNextPuzzle()) {
+      gameState.useNextPuzzle();
+      _startGeneratingNextPuzzle();
+    } else {
+      final settings = context.read<PuzzleSettings>();
+      final (grid, solution) = _generator.generatePuzzle(settings);
+      gameState.startNewGameWithPuzzle(grid, solution);
+      _startGeneratingNextPuzzle();
+    }
   }
   
   void _openSettings() {
@@ -90,6 +139,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final currentTheme = context.watch<ThemeProvider>().currentTheme;
+    final gameState = context.watch<GameState>();
     
     return Container(
       decoration: currentTheme.backgroundImage != null
@@ -130,9 +180,23 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
               icon: const Icon(Icons.settings),
               onPressed: _openSettings,
             ),
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              onPressed: _startNewGame,
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.refresh),
+                  onPressed: _isNewPuzzleButtonEnabled ? _startNewGame : null,
+                  color: _isNewPuzzleButtonEnabled 
+                      ? currentTheme.iconButtonColor 
+                      : currentTheme.disabledIconButtonColor,
+                ),
+                if (gameState.isGeneratingNextPuzzle)
+                  CircularProgressIndicator(
+                    value: _generationProgress,
+                    strokeWidth: 2,
+                    color: currentTheme.iconButtonColor,
+                  ),
+              ],
             ),
           ],
         ),
@@ -191,23 +255,24 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          ElevatedButton.icon(
-                            onPressed: () {
-                              setState(() {
-                                _showSingles = !_showSingles;
-                                if (_showSingles) {
-                                  _showPairs = false;
-                                  _showTriples = false;
-                                }
-                              });
-                            },
-                            icon: Icon(_showSingles ? Icons.visibility_off : Icons.visibility),
-                            label: Text('Singles'),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: currentTheme.inputNumberInputBackgroundColor,
-                              foregroundColor: currentTheme.inputNumberInputTextColor,
+                          if (const bool.fromEnvironment('dart.vm.product') == false)
+                            ElevatedButton.icon(
+                              onPressed: () {
+                                setState(() {
+                                  _showSingles = !_showSingles;
+                                  if (_showSingles) {
+                                    _showPairs = false;
+                                    _showTriples = false;
+                                  }
+                                });
+                              },
+                              icon: Icon(_showSingles ? Icons.visibility_off : Icons.visibility),
+                              label: Text('Singles'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: currentTheme.inputNumberInputBackgroundColor,
+                                foregroundColor: currentTheme.inputNumberInputTextColor,
+                              ),
                             ),
-                          ),
                           ElevatedButton.icon(
                             onPressed: () {
                               setState(() {
