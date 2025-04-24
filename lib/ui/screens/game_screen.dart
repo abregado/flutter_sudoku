@@ -260,10 +260,6 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                               onPressed: () {
                                 setState(() {
                                   _showSingles = !_showSingles;
-                                  if (_showSingles) {
-                                    _showPairs = false;
-                                    _showTriples = false;
-                                  }
                                 });
                               },
                               icon: Icon(_showSingles ? Icons.visibility_off : Icons.visibility),
@@ -277,10 +273,6 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                             onPressed: () {
                               setState(() {
                                 _showPairs = !_showPairs;
-                                if (_showPairs) {
-                                  _showSingles = false;
-                                  _showTriples = false;
-                                }
                               });
                             },
                             icon: Icon(_showPairs ? Icons.visibility_off : Icons.visibility),
@@ -294,10 +286,6 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                             onPressed: () {
                               setState(() {
                                 _showTriples = !_showTriples;
-                                if (_showTriples) {
-                                  _showSingles = false;
-                                  _showPairs = false;
-                                }
                               });
                             },
                             icon: Icon(_showTriples ? Icons.visibility_off : Icons.visibility),
@@ -317,12 +305,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                         bottom: 16.0 + bottomPadding,
                       ),
                       child: NumberInputRow(
-                        onNumberSelected: () {
-                          if (_showPairs) {
-                            setState(() {
-                              _showPairs = false;
-                            });
-                          }
+                        onNumberSelected: () {                        
                         },
                       ),
                     ),
