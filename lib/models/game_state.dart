@@ -241,26 +241,8 @@ class GameState extends ChangeNotifier {
   
   // Check if a move is valid
   bool isValidMove(int row, int col, int value) {
-    // Check row
-    for (int i = 0; i < 9; i++) {
-      if (i != col && grid[row][i] == value) return false;
-    }
-    
-    // Check column
-    for (int i = 0; i < 9; i++) {
-      if (i != row && grid[i][col] == value) return false;
-    }
-    
-    // Check 3x3 box
-    int boxRow = (row ~/ 3) * 3;
-    int boxCol = (col ~/ 3) * 3;
-    for (int i = boxRow; i < boxRow + 3; i++) {
-      for (int j = boxCol; j < boxCol + 3; j++) {
-        if (i != row && j != col && grid[i][j] == value) return false;
-      }
-    }
-    
-    return true;
+    //Check against the solution
+    return solution[row][col] == value;
   }
   
   // Make a move
