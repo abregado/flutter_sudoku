@@ -78,7 +78,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
     // Find the fastest mistake-free puzzle
     final fastestPerfectPuzzle = completedPuzzles
         .where((p) => p.mistakes == 0)
-        .reduce((a, b) => a.timeSpent < b.timeSpent ? a : b);
+        .isNotEmpty
+        ? completedPuzzles
+            .where((p) => p.mistakes == 0)
+            .reduce((a, b) => a.timeSpent < b.timeSpent ? a : b)
+        : null;
 
     return Scaffold(
       backgroundColor: currentTheme.backgroundColor,
