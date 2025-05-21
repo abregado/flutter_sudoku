@@ -6,6 +6,8 @@ import 'models/puzzle_settings.dart';
 import 'models/theme_model.dart';
 import 'providers/theme_provider.dart';
 import 'ui/screens/game_screen.dart';
+import 'ui/screens/settings_screen.dart';
+import 'ui/screens/theme_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -39,9 +41,65 @@ class MyApp extends StatelessWidget {
               scaffoldBackgroundColor: currentTheme.backgroundColor,
               useMaterial3: true,
             ),
-            home: const GameScreen(),
+            home: const MainScreen(),
           );
         },
+      ),
+    );
+  }
+}
+
+class MainScreen extends StatelessWidget {
+  const MainScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final currentTheme = context.watch<ThemeProvider>().currentTheme;
+    
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Sudoku'),
+        backgroundColor: currentTheme.topBarColor,
+        foregroundColor: currentTheme.topBarFontColor,
+        iconTheme: IconThemeData(color: currentTheme.iconButtonColor),
+      ),
+      body: const GameScreen(),
+      drawer: NavigationDrawer(
+        onDestinationSelected: (int index) {
+          Navigator.pop(context); // Close the drawer
+          
+          switch (index) {
+            case 0:
+              // Already on GameScreen, do nothing
+              break;
+            case 1:
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+              break;
+            case 2:
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ThemeScreen()),
+              );
+              break;
+          }
+        },
+        children: const [
+          NavigationDrawerDestination(
+            icon: Icon(Icons.grid_4x4),
+            label: Text('Game'),
+          ),
+          NavigationDrawerDestination(
+            icon: Icon(Icons.settings),
+            label: Text('Settings'),
+          ),
+          NavigationDrawerDestination(
+            icon: Icon(Icons.palette),
+            label: Text('Themes'),
+          ),
+        ],
       ),
     );
   }

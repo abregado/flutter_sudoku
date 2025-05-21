@@ -152,54 +152,6 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
           : BoxDecoration(color: currentTheme.backgroundColor),
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: const Text('Sudoku'),
-          backgroundColor: currentTheme.topBarColor,
-          foregroundColor: currentTheme.topBarFontColor,
-          iconTheme: IconThemeData(color: currentTheme.iconButtonColor),
-          actions: [
-            if (const bool.fromEnvironment('dart.vm.product') == false)
-              IconButton(
-                icon: Icon(
-                  _showSolution ? Icons.visibility_off : Icons.visibility,
-                  color: _showSolution ? Colors.grey : currentTheme.iconButtonColor,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _showSolution = !_showSolution;
-                  });
-                },
-                tooltip: 'Toggle solution visibility',
-              ),
-            IconButton(
-              icon: const Icon(Icons.palette),
-              onPressed: _openThemes,
-              tooltip: 'Themes',
-            ),
-            IconButton(
-              icon: const Icon(Icons.settings),
-              onPressed: _openSettings,
-            ),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                IconButton(
-                  icon: const Icon(Icons.refresh),
-                  onPressed: _isNewPuzzleButtonEnabled ? _startNewGame : null,
-                  color: _isNewPuzzleButtonEnabled 
-                      ? currentTheme.iconButtonColor 
-                      : currentTheme.disabledIconButtonColor,
-                ),
-                if (gameState.isGeneratingNextPuzzle)
-                  CircularProgressIndicator(
-                    value: _generationProgress,
-                    strokeWidth: 2,
-                    color: currentTheme.iconButtonColor,
-                  ),
-              ],
-            ),
-          ],
-        ),
         body: Consumer<GameState>(
           builder: (context, gameState, child) {
             return Stack(
@@ -235,6 +187,45 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                                 ),
                               );
                             },
+                          ),
+                        ],
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          if (const bool.fromEnvironment('dart.vm.product') == false)
+                            IconButton(
+                              icon: Icon(
+                                _showSolution ? Icons.visibility_off : Icons.visibility,
+                                color: _showSolution ? Colors.grey : currentTheme.iconButtonColor,
+                              ),
+                              onPressed: () {
+                                setState(() {
+                                  _showSolution = !_showSolution;
+                                });
+                              },
+                              tooltip: 'Toggle solution visibility',
+                            ),
+                          Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.refresh),
+                                onPressed: _isNewPuzzleButtonEnabled ? _startNewGame : null,
+                                color: _isNewPuzzleButtonEnabled 
+                                    ? currentTheme.iconButtonColor 
+                                    : currentTheme.disabledIconButtonColor,
+                              ),
+                              if (gameState.isGeneratingNextPuzzle)
+                                CircularProgressIndicator(
+                                  value: _generationProgress,
+                                  strokeWidth: 2,
+                                  color: currentTheme.iconButtonColor,
+                                ),
+                            ],
                           ),
                         ],
                       ),
@@ -307,8 +298,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                       child: NumberInputRow(
                         onNumberSelected: () {                        
                         },
-                      ),
-                    ),
+                      ),                    ),
                   ],
                 ),
                 if (gameState.isComplete)
