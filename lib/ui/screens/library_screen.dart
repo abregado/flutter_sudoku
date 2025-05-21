@@ -8,6 +8,7 @@ import '../../providers/theme_provider.dart';
 import '../../models/game_state.dart';
 import '../../main.dart';
 import 'game_screen.dart';
+import '../widgets/puzzle_thumbnail.dart';
 
 class LibraryScreen extends StatefulWidget {
   const LibraryScreen({super.key});
@@ -104,7 +105,11 @@ class _LibraryScreenState extends State<LibraryScreen> {
                 return ListTile(
                   leading: puzzle.isCompleted
                       ? const Icon(Icons.emoji_events, color: Colors.amber)
-                      : const Icon(Icons.grid_4x4),
+                      : PuzzleThumbnail(
+                          grid: puzzle.initialGrid,
+                          size: 36.0,
+                          cellColor: currentTheme.uiTextColor,
+                        ),
                   title: Text(
                     'Puzzle ${puzzle.id.substring(0, 8)}',
                     style: TextStyle(color: currentTheme.uiTextColor),

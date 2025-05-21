@@ -89,7 +89,27 @@ class PuzzleLibraryProvider extends ChangeNotifier {
 
   List<PuzzleEntry> getSortedPuzzles() {
     final sorted = List<PuzzleEntry>.from(_puzzles);
-    sorted.sort((a, b) => b.generatedAt.compareTo(a.generatedAt));
+    sorted.sort((a, b) {
+      // First sort by completion status
+      if (a.isCompleted != b.isCompleted) {
+        return a.isCompleted ? 1 : -1; // Completed puzzles go to the bottom
+      }
+      
+      // For unfinished puzzles, sort by last played time (active puzzle first, then by generated time)
+      if (!a.isCompleted && !b.isCompleted) {
+        if (a.isActive != b.isActive) {
+          return a.isActive ? -1 : 1;
+        }
+        return b.generatedAt.compareTo(a.generatedAt);
+      }
+      
+      // For completed puzzles, sort by completion time
+      if (a.isCompleted && b.isCompleted) {
+        return b.completedAt!.compareTo(a.completedAt!);
+      }
+      
+      return 0;
+    });
     return sorted;
   }
 
