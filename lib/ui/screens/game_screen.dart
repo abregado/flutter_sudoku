@@ -9,33 +9,38 @@ import '../widgets/sudoku_grid.dart';
 import '../widgets/number_input_row.dart';
 import 'settings_screen.dart';
 import 'theme_screen.dart';
+import '../../providers/puzzle_library_provider.dart';
+import 'library_screen.dart';
 
 class GameScreen extends StatefulWidget {
-  const GameScreen({super.key});
+  final GameState gameState;
+  
+  const GameScreen({
+    super.key,
+    required this.gameState,
+  });
 
   @override
   State<GameScreen> createState() => _GameScreenState();
 }
 
 class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
-  final PuzzleGenerator _generator = BacktrackingGenerator();
+  late GameState _gameState;
   bool _showSolution = false;
   bool _showPairs = false;
   bool _showSingles = false;
   bool _showTriples = false;
-  bool _isNewPuzzleButtonEnabled = true;
-  double _generationProgress = 0.0;
   
   @override
   void initState() {
     super.initState();
+    _gameState = widget.gameState;
     WidgetsBinding.instance.addObserver(this);
     // Enable wakelock to keep screen on during gameplay
     WakelockPlus.enable();
     // Start the timer when the screen is created
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<GameState>().startTimer();
-      _startGeneratingNextPuzzle();
+      _loadActivePuzzle();
     });
   }
   
@@ -45,77 +50,44 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     // Disable wakelock when leaving the game screen
     WakelockPlus.disable();
     // Stop the timer when the screen is disposed
-    context.read<GameState>().stopTimer();
+    _gameState.stopTimer();
     super.dispose();
   }
   
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final gameState = context.read<GameState>();
     if (state == AppLifecycleState.paused) {
-      gameState.stopTimer();
+      _gameState.stopTimer();
       // Disable wakelock when app goes to background
       WakelockPlus.disable();
     } else if (state == AppLifecycleState.resumed) {
-      gameState.startTimer();
+      _gameState.startTimer();
       // Re-enable wakelock when app comes to foreground
       WakelockPlus.enable();
     }
   }
   
-  Future<void> _startGeneratingNextPuzzle() async {
-    final gameState = context.read<GameState>();
-    if (gameState.isGeneratingNextPuzzle || gameState.hasNextPuzzle()) return;
-    
-    gameState.startGeneratingNextPuzzle();
-    setState(() {
-      _isNewPuzzleButtonEnabled = false;
-      _generationProgress = 0.0;
-    });
-    
-    try {
-      final settings = context.read<PuzzleSettings>();
-      final (grid, solution) = await _generator.generatePuzzleAsync(
-        settings,
-        (progress) {
-          setState(() {
-            _generationProgress = progress;
-          });
-        },
-      );
-      gameState.setNextPuzzle(grid, solution);
+  void _loadActivePuzzle() {
+    final libraryProvider = context.read<PuzzleLibraryProvider>();
+    final activePuzzle = libraryProvider.activePuzzle;
+    if (activePuzzle != null) {
+      final oldPuzzle = _gameState.loadPuzzle(activePuzzle);
       
-      setState(() {
-        _isNewPuzzleButtonEnabled = true;
-        _generationProgress = 1.0;
-      });
+      // If there was an old puzzle, update it in the library
+      if (oldPuzzle != null) {
+        libraryProvider.updatePuzzle(oldPuzzle);
+      }
       
-      // Flash the button to indicate it's ready
-      await Future.delayed(const Duration(milliseconds: 100));
-      setState(() {
-        _isNewPuzzleButtonEnabled = false;
-      });
-      await Future.delayed(const Duration(milliseconds: 100));
-      setState(() {
-        _isNewPuzzleButtonEnabled = true;
-      });
-    } catch (e) {
-      // If generation fails, try again
-      _startGeneratingNextPuzzle();
-    }
-  }
-  
-  void _startNewGame() {
-    final gameState = context.read<GameState>();
-    
-    if (gameState.hasNextPuzzle()) {
-      gameState.useNextPuzzle();
-      _startGeneratingNextPuzzle();
+      // Force a rebuild
+      setState(() {});
     } else {
-      final settings = context.read<PuzzleSettings>();
-      final (grid, solution) = _generator.generatePuzzle(settings);
-      gameState.startNewGameWithPuzzle(grid, solution);
-      _startGeneratingNextPuzzle();
+      // If no active puzzle, go to library
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LibraryScreen()),
+        );
+      });
     }
   }
   
@@ -135,12 +107,46 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
     );
   }
   
+  void _checkPuzzleCompletion() {
+    if (_gameState.isComplete) {
+      final libraryProvider = context.read<PuzzleLibraryProvider>();
+      final activePuzzle = libraryProvider.activePuzzle;
+      if (activePuzzle != null) {
+        libraryProvider.updatePuzzle(
+          activePuzzle.copyWith(
+            isCompleted: true,
+            completedAt: DateTime.now(),
+            timeSpent: activePuzzle.timeSpent,
+            mistakes: activePuzzle.mistakes,
+          ),
+        );
+      }
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
     final bottomPadding = MediaQuery.of(context).padding.bottom;
     final currentTheme = context.watch<ThemeProvider>().currentTheme;
     final gameState = context.watch<GameState>();
+    final libraryProvider = context.watch<PuzzleLibraryProvider>();
     
+    // Check if we have no current puzzle
+    if (gameState.currentPuzzle == null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LibraryScreen()),
+        );
+      });
+      return const SizedBox.shrink();
+    }
+
+    // Check for puzzle completion in a post-frame callback
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkPuzzleCompletion();
+    });
+
     return Container(
       decoration: currentTheme.backgroundImage != null
           ? BoxDecoration(
@@ -167,7 +173,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                             builder: (context, settings, child) {
                               if (!settings.showMistakes) return const SizedBox.shrink();
                               return Text(
-                                'Mistakes: ${gameState.mistakes}',
+                                'Mistakes: ${gameState.currentPuzzle?.mistakes ?? 0}',
                                 style: TextStyle(
                                   fontSize: 16,
                                   color: currentTheme.uiTextColor,
@@ -209,24 +215,6 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                               },
                               tooltip: 'Toggle solution visibility',
                             ),
-                          Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.refresh),
-                                onPressed: _isNewPuzzleButtonEnabled ? _startNewGame : null,
-                                color: _isNewPuzzleButtonEnabled 
-                                    ? currentTheme.iconButtonColor 
-                                    : currentTheme.disabledIconButtonColor,
-                              ),
-                              if (gameState.isGeneratingNextPuzzle)
-                                CircularProgressIndicator(
-                                  value: _generationProgress,
-                                  strokeWidth: 2,
-                                  color: currentTheme.iconButtonColor,
-                                ),
-                            ],
-                          ),
                         ],
                       ),
                     ),
@@ -298,7 +286,8 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                       child: NumberInputRow(
                         onNumberSelected: () {                        
                         },
-                      ),                    ),
+                      ),
+                    ),
                   ],
                 ),
                 if (gameState.isComplete)
@@ -323,13 +312,13 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                           ),
                           const SizedBox(height: 8),
                           Text(
-                            'Time: ${gameState.formatDuration(gameState.completionTime!)}',
+                            'Time: ${gameState.formatDuration(gameState.currentPuzzle?.timeSpent ?? Duration.zero)}',
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: Colors.white,
                             ),
                           ),
                           Text(
-                            'Mistakes: ${gameState.completionMistakes}',
+                            'Mistakes: ${gameState.currentPuzzle?.mistakes ?? 0}',
                             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                               color: Colors.white,
                             ),
@@ -337,11 +326,13 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
                           const SizedBox(height: 32),
                           ElevatedButton.icon(
                             onPressed: () {
-                              gameState.resetTimer();
-                              _startNewGame();
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => const LibraryScreen()),
+                              );
                             },
-                            icon: const Icon(Icons.refresh),
-                            label: const Text('New Puzzle'),
+                            icon: const Icon(Icons.library_books),
+                            label: const Text('Back to Library'),
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 32,

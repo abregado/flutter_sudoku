@@ -5,9 +5,11 @@ import 'models/game_state.dart';
 import 'models/puzzle_settings.dart';
 import 'models/theme_model.dart';
 import 'providers/theme_provider.dart';
+import 'providers/puzzle_library_provider.dart';
 import 'ui/screens/game_screen.dart';
 import 'ui/screens/settings_screen.dart';
 import 'ui/screens/theme_screen.dart';
+import 'ui/screens/library_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -30,6 +32,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => GameState()),
         ChangeNotifierProvider(create: (_) => PuzzleSettings(prefs)),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ChangeNotifierProvider(create: (_) => PuzzleLibraryProvider(prefs)),
       ],
       child: Consumer<ThemeProvider>(
         builder: (context, themeProvider, child) {
@@ -55,6 +58,12 @@ class MainScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentTheme = context.watch<ThemeProvider>().currentTheme;
+    final libraryProvider = context.watch<PuzzleLibraryProvider>();
+    
+    // If there's no active puzzle, show the library screen
+    if (libraryProvider.activePuzzle == null) {
+      return const LibraryScreen();
+    }
     
     return Scaffold(
       appBar: AppBar(
@@ -63,7 +72,7 @@ class MainScreen extends StatelessWidget {
         foregroundColor: currentTheme.topBarFontColor,
         iconTheme: IconThemeData(color: currentTheme.iconButtonColor),
       ),
-      body: const GameScreen(),
+      body: GameScreen(gameState: GameState()),
       drawer: NavigationDrawer(
         onDestinationSelected: (int index) {
           Navigator.pop(context); // Close the drawer
@@ -75,10 +84,16 @@ class MainScreen extends StatelessWidget {
             case 1:
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+                MaterialPageRoute(builder: (context) => const LibraryScreen()),
               );
               break;
             case 2:
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsScreen()),
+              );
+              break;
+            case 3:
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const ThemeScreen()),
@@ -90,6 +105,10 @@ class MainScreen extends StatelessWidget {
           NavigationDrawerDestination(
             icon: Icon(Icons.grid_4x4),
             label: Text('Game'),
+          ),
+          NavigationDrawerDestination(
+            icon: Icon(Icons.library_books),
+            label: Text('Library'),
           ),
           NavigationDrawerDestination(
             icon: Icon(Icons.settings),

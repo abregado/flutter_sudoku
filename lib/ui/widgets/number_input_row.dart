@@ -119,11 +119,13 @@ class NumberInputRow extends StatelessWidget {
   }
   
   bool _isNumberDisabled(GameState gameState, int number) {
+    if (gameState.currentPuzzle == null) return false;
+    
     // Count how many times this number appears in the grid
     int count = 0;
     for (int i = 0; i < 9; i++) {
       for (int j = 0; j < 9; j++) {
-        if (gameState.grid[i][j] == number) {
+        if (gameState.currentPuzzle!.currentGrid[i][j] == number) {
           count++;
         }
       }
@@ -131,5 +133,20 @@ class NumberInputRow extends StatelessWidget {
     
     // If we already have 9 of this number, disable it
     return count >= 9;
+  }
+
+  int _getNumberCount(BuildContext context, int number) {
+    final gameState = context.watch<GameState>();
+    if (gameState.currentPuzzle == null) return 0;
+    
+    int count = 0;
+    for (int i = 0; i < 9; i++) {
+      for (int j = 0; j < 9; j++) {
+        if (gameState.currentPuzzle!.currentGrid[i][j] == number) {
+          count++;
+        }
+      }
+    }
+    return count;
   }
 } 

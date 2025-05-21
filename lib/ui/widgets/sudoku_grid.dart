@@ -50,12 +50,17 @@ class SudokuGrid extends StatelessWidget {
   Widget _buildCell(BuildContext context, int row, int col) {
     final gameState = context.watch<GameState>();
     final currentTheme = context.watch<ThemeProvider>().currentTheme;
-    final value = isPreview 
-        ? ((row * 3 + row ~/ 3 + col) % 9 + 1) 
-        : gameState.grid[row][col];
-    final isInitial = isPreview 
-        ? (previewInitialCells?[row][col] ?? true)
-        : gameState.initialCells[row][col];
+    
+    final value = gameState.currentPuzzle == null 
+        ? null 
+        : gameState.currentPuzzle!.currentGrid[row][col] == 0 
+            ? null 
+            : gameState.currentPuzzle!.currentGrid[row][col];
+            
+    final isInitial = gameState.currentPuzzle == null 
+        ? false 
+        : gameState.currentPuzzle!.initialGrid[row][col] != 0;
+        
     final isSelected = isPreview 
         ? (row == 4 && col == 4)
         : (gameState.selectedRow == row && gameState.selectedCol == col);
@@ -68,9 +73,9 @@ class SudokuGrid extends StatelessWidget {
     final isInvalid = isPreview 
         ? false 
         : (value != null && !gameState.isValidMove(row, col, value));
-    final solutionValue = isPreview 
+    final solutionValue = gameState.currentPuzzle == null 
         ? null 
-        : (showSolution ? gameState.solution[row][col] : null);
+        : (showSolution ? gameState.currentPuzzle!.solution[row][col] : null);
     
     return SudokuCell(
       value: value,
@@ -107,8 +112,8 @@ class SudokuGrid extends StatelessWidget {
       return false;
     }
     
-    final selectedValue = gameState.grid[gameState.selectedRow!][gameState.selectedCol!];
-    final currentValue = gameState.grid[row][col];
+    final selectedValue = gameState.currentPuzzle!.currentGrid[gameState.selectedRow!][gameState.selectedCol!];
+    final currentValue = gameState.currentPuzzle!.currentGrid[row][col];
     
     return selectedValue != null && 
            currentValue != null && 

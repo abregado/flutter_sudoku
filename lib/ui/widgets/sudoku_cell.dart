@@ -109,8 +109,9 @@ class SudokuCell extends StatelessWidget {
   Widget _buildCandidates(BuildContext context, GameState gameState) {
     final currentTheme = context.watch<ThemeProvider>().currentTheme;
     
-    // Calculate candidates for this specific cell
-    final candidates = _getCandidates(gameState.grid, cellRow, cellCol);
+    if (gameState.currentPuzzle == null) return const SizedBox.shrink();
+    
+    final candidates = _getCandidates(gameState.currentPuzzle!.currentGrid, cellRow, cellCol);
     
     if (showSingles && candidates.length == 1) {
       return Text(
@@ -145,17 +146,17 @@ class SudokuCell extends StatelessWidget {
     return const SizedBox.shrink();
   }
 
-  Set<int> _getCandidates(List<List<int?>> grid, int row, int col) {
+  List<int> _getCandidates(List<List<int>> grid, int row, int col) {
     final candidates = <int>{};
     for (int num = 1; num <= 9; num++) {
       if (_isSafe(grid, row, col, num)) {
         candidates.add(num);
       }
     }
-    return candidates;
+    return candidates.toList();
   }
 
-  bool _isSafe(List<List<int?>> grid, int row, int col, int num) {
+  bool _isSafe(List<List<int>> grid, int row, int col, int num) {
     // Check row
     for (int x = 0; x < 9; x++) {
       if (grid[row][x] == num) return false;
