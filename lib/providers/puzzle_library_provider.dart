@@ -92,4 +92,24 @@ class PuzzleLibraryProvider extends ChangeNotifier {
     sorted.sort((a, b) => b.generatedAt.compareTo(a.generatedAt));
     return sorted;
   }
+
+  Future<void> resetPuzzle(String id) async {
+    final index = _puzzles.indexWhere((p) => p.id == id);
+    if (index != -1) {
+      final puzzle = _puzzles[index];
+      final resetPuzzle = puzzle.copyWith(
+        currentGrid: List.from(puzzle.initialGrid),
+        timeSpent: Duration.zero,
+        completedAt: null,
+        isCompleted: false,
+        mistakes: 0,
+      );
+      _puzzles[index] = resetPuzzle;
+      if (resetPuzzle.isActive) {
+        _activePuzzle = resetPuzzle;
+      }
+      await _savePuzzles();
+      notifyListeners();
+    }
+  }
 } 

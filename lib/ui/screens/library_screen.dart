@@ -115,25 +115,41 @@ class _LibraryScreenState extends State<LibraryScreen> {
                     'Mistakes: ${puzzle.mistakes}',
                     style: TextStyle(color: currentTheme.uiTextColor.withOpacity(0.7)),
                   ),
-                  trailing: puzzle.isActive
-                      ? const Icon(Icons.play_arrow, color: Colors.green)
-                      : const Icon(Icons.arrow_forward),
-                  onTap: () async {
-                    await libraryProvider.setActivePuzzle(puzzle.id);
-                    if (mounted) {
-                      // Get the GameState from the provider
-                      final gameState = context.read<GameState>();
-                      final activePuzzle = libraryProvider.activePuzzle;
-                      if (activePuzzle != null) {
-                        gameState.loadPuzzle(activePuzzle);
-                        // Navigate back to MainScreen which will show GameScreen
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => const MainScreen()),
-                        );
-                      }
-                    }
-                  },
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.refresh),
+                        onPressed: () async {
+                          await libraryProvider.resetPuzzle(puzzle.id);
+                        },
+                        color: currentTheme.iconButtonColor,
+                      ),
+                      if (!puzzle.isCompleted)
+                        IconButton(
+                          icon: puzzle.isActive
+                              ? const Icon(Icons.play_arrow, color: Colors.green)
+                              : const Icon(Icons.arrow_forward),
+                          onPressed: () async {
+                            await libraryProvider.setActivePuzzle(puzzle.id);
+                            if (mounted) {
+                              // Get the GameState from the provider
+                              final gameState = context.read<GameState>();
+                              final activePuzzle = libraryProvider.activePuzzle;
+                              if (activePuzzle != null) {
+                                gameState.loadPuzzle(activePuzzle);
+                                // Navigate back to MainScreen which will show GameScreen
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const MainScreen()),
+                                );
+                              }
+                            }
+                          },
+                          color: currentTheme.iconButtonColor,
+                        ),
+                    ],
+                  ),
                 );
               },
             ),
