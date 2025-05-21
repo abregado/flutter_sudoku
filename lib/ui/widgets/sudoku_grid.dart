@@ -116,7 +116,9 @@ class SudokuGrid extends StatelessWidget {
     final currentValue = gameState.currentPuzzle!.currentGrid[row][col];
     
     return selectedValue != null && 
+           selectedValue != 0 &&
            currentValue != null && 
+           currentValue != 0 &&
            selectedValue == currentValue &&
            !(row == gameState.selectedRow! && col == gameState.selectedCol!);
   }
