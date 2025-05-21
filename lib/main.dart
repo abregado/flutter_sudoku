@@ -52,16 +52,41 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class MainScreen extends StatelessWidget {
+class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
+
+  @override
+  State<MainScreen> createState() => _MainScreenState();
+}
+
+class _MainScreenState extends State<MainScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Load the active puzzle after the first frame
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadActivePuzzle();
+    });
+  }
+
+  void _loadActivePuzzle() {
+    final libraryProvider = context.read<PuzzleLibraryProvider>();
+    final gameState = context.read<GameState>();
+    final activePuzzle = libraryProvider.activePuzzle;
+    
+    if (activePuzzle != null) {
+      gameState.loadPuzzle(activePuzzle);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final currentTheme = context.watch<ThemeProvider>().currentTheme;
     final libraryProvider = context.watch<PuzzleLibraryProvider>();
+    final gameState = context.watch<GameState>();
     
-    // If there's no active puzzle, show the library screen
-    if (libraryProvider.activePuzzle == null) {
+    // If there's no active puzzle or no current puzzle in game state, show the library screen
+    if (libraryProvider.activePuzzle == null || gameState.currentPuzzle == null) {
       return const LibraryScreen();
     }
     
@@ -72,7 +97,7 @@ class MainScreen extends StatelessWidget {
         foregroundColor: currentTheme.topBarFontColor,
         iconTheme: IconThemeData(color: currentTheme.iconButtonColor),
       ),
-      body: GameScreen(gameState: GameState()),
+      body: GameScreen(gameState: gameState),
       drawer: NavigationDrawer(
         onDestinationSelected: (int index) {
           Navigator.pop(context); // Close the drawer
